@@ -16,12 +16,14 @@ public class AuthService {
             String[] parts = line.split("\\|");
             if (parts.length >= 4) {
                 String role = parts[3];
+                User user = null;
                 switch (role) {
-                    case "Customer": users.add(Customer.fromString(line)); break;
-                    case "Scheduler": users.add(Scheduler.fromString(line)); break;
-                    case "Administrator": users.add(Administrator.fromString(line)); break;
-                    case "Manager": users.add(Manager.fromString(line)); break;
+                    case "Customer": user = Customer.fromString(line); break;
+                    case "Scheduler": user = Scheduler.fromString(line); break;
+                    case "Administrator": user = Administrator.fromString(line); break;
+                    case "Manager": user = Manager.fromString(line); break;
                 }
+                if (user != null) users.add(user); // Bug fix: null safety
             }
         }
         return users;
@@ -33,12 +35,26 @@ public class AuthService {
                 .findFirst();
     }
 
+    // Bug fix: Use max-ID to avoid collisions after deletions
+    private static int getNextUserId(String prefix) {
+        List<User> users = getAllUsers();
+        int maxId = 0;
+        for (User u : users) {
+            try {
+                String numPart = u.getId().replaceAll("[^0-9]", "");
+                int num = Integer.parseInt(numPart);
+                if (num > maxId) maxId = num;
+            } catch (NumberFormatException ignored) {}
+        }
+        return maxId + 1;
+    }
+
     public static boolean registerCustomer(String username, String password, String fullName, String contact) {
         List<User> users = getAllUsers();
         if (users.stream().anyMatch(u -> u.getUsername().equalsIgnoreCase(username))) {
             return false; // User already exists
         }
-        String id = "CUST" + (users.size() + 1);
+        String id = "CUST" + getNextUserId("CUST");
         Customer customer = new Customer(id, username, password, fullName, contact);
         DataStorage.appendToFile(USER_FILE, customer);
         return true;
@@ -50,7 +66,7 @@ public class AuthService {
             return false;
         }
         String prefix = role.substring(0, 3).toUpperCase();
-        String id = prefix + (users.size() + 1);
+        String id = prefix + getNextUserId(prefix);
         User user = null;
         if (role.equals("Scheduler")) user = new Scheduler(id, username, password, fullName, contact);
         else if (role.equals("Administrator")) user = new Administrator(id, username, password, fullName, contact);

@@ -3,6 +3,7 @@ package com.hallsymphony.util;
 import com.hallsymphony.service.AuthService;
 import com.hallsymphony.service.HallService;
 import java.io.File;
+import java.io.IOException;
 
 public class DataInitializer {
     public static void initialize() {
@@ -38,9 +39,21 @@ public class DataInitializer {
         }
 
         File issueFile = new File("data/db/issues.txt");
-        if (!issueFile.exists() || issueFile.length() == 0) {
-            System.out.println("Initializing default issues...");
-            com.hallsymphony.service.IssueService.raiseIssue("CUST1", "BOOK1", "A/C not working in Grand Auditorium");
+        if (!issueFile.exists()) {
+            try {
+                issueFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        File bookingFile = new File("data/db/bookings.txt");
+        if (!bookingFile.exists()) {
+            try {
+                bookingFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ import com.hallsymphony.model.Schedule;
 import com.hallsymphony.util.DataStorage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HallService {
@@ -15,12 +16,25 @@ public class HallService {
         List<String> lines = DataStorage.readList(HALL_FILE);
         return lines.stream()
                 .map(Hall::fromString)
+                .filter(Objects::nonNull)  // Bug fix: null safety
                 .collect(Collectors.toList());
     }
 
-    public static boolean addHall(String name, String type, int capacity, double rate, String description) {
+    // Bug fix: max-ID based generation
+    private static int getNextHallId() {
         List<Hall> halls = getAllHalls();
-        String id = "HALL" + (halls.size() + 1);
+        int maxId = 0;
+        for (Hall h : halls) {
+            try {
+                int num = Integer.parseInt(h.getId().replace("HALL", ""));
+                if (num > maxId) maxId = num;
+            } catch (NumberFormatException ignored) {}
+        }
+        return maxId + 1;
+    }
+
+    public static boolean addHall(String name, String type, int capacity, double rate, String description) {
+        String id = "HALL" + getNextHallId();
         Hall hall = new Hall(id, name, type, capacity, rate, description);
         DataStorage.appendToFile(HALL_FILE, hall);
         return true;
@@ -57,6 +71,7 @@ public class HallService {
     public static List<Schedule> getAllSchedules() {
         return DataStorage.readList(SCHEDULE_FILE).stream()
                 .map(Schedule::fromString)
+                .filter(Objects::nonNull)  // Bug fix: null safety
                 .collect(Collectors.toList());
     }
 
@@ -64,6 +79,19 @@ public class HallService {
         return getAllSchedules().stream()
                 .filter(s -> s.getHallId().equals(hallId))
                 .collect(Collectors.toList());
+    }
+
+    // Bug fix: max-ID based generation
+    private static int getNextScheduleId() {
+        List<Schedule> schedules = getAllSchedules();
+        int maxId = 0;
+        for (Schedule s : schedules) {
+            try {
+                int num = Integer.parseInt(s.getId().replace("SCH", ""));
+                if (num > maxId) maxId = num;
+            } catch (NumberFormatException ignored) {}
+        }
+        return maxId + 1;
     }
 
     public static boolean addSchedule(Schedule schedule) {

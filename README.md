@@ -342,72 +342,74 @@ ISSUE1|CUST4|BOOK1|A/C not working in Grand Auditorium|IN_PROGRESS|SCH3
 ### Prerequisites
 
 - **Java Development Kit (JDK) 11 or higher** must be installed.
-- Verify with: `java -version` and `javac -version`
+- Verify by opening a terminal/command prompt and typing:
+  ```
+  java -version
+  javac -version
+  ```
+  Both commands should show version 11 or higher.
+
+> ⚠️ **IMPORTANT:** You must always run all commands from the **project root directory** (the folder that contains `src/`, `data/`, and `run.sh`). If you run from a different folder, the application will not find the data files.
 
 ---
 
-### Option A: Using the Script (Recommended)
+### Option A: Using the Shell Script (Linux / macOS only)
 
-The `run.sh` script automates compiling and launching the application in one step.
-
-**Step 1:** Open a terminal and navigate to the project root:
 ```bash
 cd /path/to/Java_Assignment
-```
-
-**Step 2:** Make the script executable (only needed once):
-```bash
 chmod +x run.sh
-```
-
-**Step 3:** Run the script:
-```bash
 ./run.sh
 ```
 
-**What the script does (internally):**
-1. Creates the `bin/` directory if it does not exist.
-2. Finds all `.java` source files and writes their paths to `sources.txt`.
-3. Compiles everything with `javac -d bin @sources.txt`.
-4. If compilation succeeds, launches the app with `java -cp bin com.hallsymphony.ui.MainFrame`.
-
-**Why the script is needed:** Java requires a two-step process — compile (`javac`) then run (`java`). The project has 25 source files across 4 packages. Finding all files and passing them to `javac` manually is tedious and error-prone. The script eliminates this with `find src -name "*.java"`.
+This script automatically compiles all source files and launches the application.
 
 ---
 
-### Option B: Manual Step-by-Step
+### Option B: Manual Compilation & Run (All Platforms)
 
-If you cannot use the script (e.g., on Windows without Git Bash), run each command separately.
+Use this method if you are on **Windows**, or if the script does not work on your system.
 
-**Step 1:** Open a terminal and navigate to the project root.
+#### 🪟 Windows — Command Prompt (cmd)
 
-**Step 2:** Create the `bin/` output directory:
-```bash
-mkdir -p bin
-```
+Open **Command Prompt** and run these commands one by one:
 
-**Step 3:** Compile all Java files:
-```bash
-find src -name "*.java" > sources.txt
+```cmd
+cd C:\path\to\Java_Assignment
+mkdir bin
+dir /s /b src\*.java > sources.txt
 javac -d bin @sources.txt
-```
-
-> **On Windows (Command Prompt)**, replace the `find` command with:
-> ```cmd
-> dir /s /b src\*.java > sources.txt
-> javac -d bin @sources.txt
-> ```
-
-**Step 4:** Run the application:
-```bash
 java -cp bin com.hallsymphony.ui.MainFrame
 ```
 
-**Step 5 (Optional):** To clean compiled files and recompile fresh:
-```bash
-rm -rf bin/
-mkdir bin
+#### 🪟 Windows — PowerShell
+
+Open **PowerShell** and run these commands one by one:
+
+```powershell
+cd C:\path\to\Java_Assignment
+New-Item -ItemType Directory -Force -Path bin
+Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object { $_.FullName } | Out-File -Encoding ascii sources.txt
+javac -d bin "@sources.txt"
+java -cp bin com.hallsymphony.ui.MainFrame
 ```
+
+#### 🍎 macOS / 🐧 Linux — Terminal
+
+Open **Terminal** and run these commands one by one:
+
+```bash
+cd /path/to/Java_Assignment
+mkdir -p bin
+find src -name "*.java" > sources.txt
+javac -d bin @sources.txt
+java -cp bin com.hallsymphony.ui.MainFrame
+```
+
+---
+
+### 🔄 To Recompile After Code Changes
+
+If you make changes to the source code, just repeat the **compile** and **run** commands (the last two commands from your platform's instructions above). You do not need to delete the `bin` folder.
 
 ---
 
@@ -419,6 +421,7 @@ private static final String BASE_PATH = "data/db/";
 ```
 
 If you run `java` from inside the `src/` or `bin/` folder, the application will not find `data/db/` and will silently create empty data. **Always run from the project root.**
+
 
 ---
 

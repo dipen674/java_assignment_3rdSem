@@ -1,3 +1,4 @@
 ADM1|admin|admin123|Administrator|System Admin|0123456789
 MAN2|manager|manager123|Manager|Chief Manager|0123456788
 SCH3|staff|staff123|Scheduler|Lead Scheduler|0123456787
+CUST4|Dipen|dipen|Customer|Dipen|9822611896
