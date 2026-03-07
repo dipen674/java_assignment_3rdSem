@@ -59,8 +59,15 @@ public class CustomerDashboard extends BaseDashboard {
 
     private void refreshHallTable(DefaultTableModel model) {
         model.setRowCount(0);
-        for (Hall h : HallService.getAllHalls()) {
-            model.addRow(new Object[]{h.getId(), h.getName(), h.getType(), h.getCapacity(), h.getRatePerHour(), "Book Now"});
+        List<Schedule> schedules = HallService.getAllSchedules();
+        List<Hall> allHalls = HallService.getAllHalls();
+        
+        for (Hall h : allHalls) {
+            boolean isAvailable = schedules.stream()
+                .anyMatch(s -> s.getHallId().equals(h.getId()) && s.getType().equals("AVAILABILITY"));
+            if (isAvailable) {
+                model.addRow(new Object[]{h.getId(), h.getName(), h.getType(), h.getCapacity(), h.getRatePerHour(), "Book Now"});
+            }
         }
     }
 
@@ -86,8 +93,9 @@ public class CustomerDashboard extends BaseDashboard {
 
                 if (BookingService.createBooking(customer.getId(), hallId, start, end, total, "Customer Booking")) {
                     JOptionPane.showMessageDialog(this, "Booking Successful! Total: RM " + total);
+                    showReceipt(hallId, start, end, total);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Booking Failed (Check hours or overlap)", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Booking Failed (Check hours or overlap with maintenance/existing bookings)", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Invalid Date Format", "Error", JOptionPane.ERROR_MESSAGE);
@@ -101,6 +109,16 @@ public class CustomerDashboard extends BaseDashboard {
         DefaultTableModel model = new DefaultTableModel(columns, 0);
         JTable table = new JTable(model);
 
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JComboBox<String> statusFilter = new JComboBox<>(new String[]{"All", "Upcoming", "Past", "CANCELLED", "PAID"});
+        JButton refreshBtn = new JButton("Filter");
+        filterPanel.add(new JLabel("Status:"));
+        filterPanel.add(statusFilter);
+        filterPanel.add(refreshBtn);
+        refreshBtn.addActionListener(e -> refreshBookingTable(model, (String) statusFilter.getSelectedItem()));
+
+        refreshBookingTable(model, "All");
+
         JButton cancelBtn = new JButton("Cancel Selected");
         cancelBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
@@ -108,16 +126,31 @@ public class CustomerDashboard extends BaseDashboard {
                 String id = (String) model.getValueAt(row, 0);
                 if (BookingService.cancelBooking(id)) {
                     JOptionPane.showMessageDialog(this, "Cancelled!");
+                    refreshBookingTable(model, (String) statusFilter.getSelectedItem());
                 } else {
                     JOptionPane.showMessageDialog(this, "Cannot cancel (Must be 3 days before)", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        // Add refresh logic...
-        panel.add(new JScrollPane(table));
+        panel.add(filterPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
         panel.add(cancelBtn, BorderLayout.SOUTH);
         return panel;
+    }
+
+    private void refreshBookingTable(DefaultTableModel model, String filter) {
+        model.setRowCount(0);
+        LocalDateTime now = LocalDateTime.now();
+        for (Booking b : BookingService.getBookingsByCustomer(customer.getId())) {
+            boolean match = filter.equals("All") || b.getStatus().equals(filter);
+            if (filter.equals("Upcoming")) match = b.getStartTime().isAfter(now) && !b.getStatus().equals("CANCELLED");
+            if (filter.equals("Past")) match = b.getStartTime().isBefore(now);
+            
+            if (match) {
+                model.addRow(new Object[]{b.getId(), b.getHallId(), b.getStartTime(), b.getEndTime(), b.getStatus(), b.getTotalPrice()});
+            }
+        }
     }
 
     private JPanel createIssuePanel() {
@@ -166,13 +199,48 @@ public class CustomerDashboard extends BaseDashboard {
 
         JButton saveBtn = new JButton("Update Profile");
         saveBtn.addActionListener(e -> {
-            customer.setFullName(nameField.getText());
-            customer.setContact(contactField.getText());
-            // Update logic in auth service would be needed to persist
-            JOptionPane.showMessageDialog(this, "Profile Updated Locally!");
+            String newName = nameField.getText();
+            String newContact = contactField.getText();
+            if (AuthService.updateProfile(customer.getId(), newName, newContact)) {
+                customer.setFullName(newName);
+                customer.setContact(newContact);
+                JOptionPane.showMessageDialog(this, "Profile Updated Successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to update profile", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
         panel.add(saveBtn);
 
         return panel;
+    }
+
+    private void showReceipt(String hallId, LocalDateTime start, LocalDateTime end, double total) {
+        JFrame receiptFrame = new JFrame("Booking Receipt");
+        receiptFrame.setSize(400, 500);
+        receiptFrame.setLayout(new BorderLayout());
+        
+        JTextArea area = new JTextArea();
+        area.setEditable(false);
+        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        
+        Hall hall = HallService.getAllHalls().stream().filter(h -> h.getId().equals(hallId)).findFirst().get();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("===============================\n");
+        sb.append("       HALL SYMPHONY INC       \n");
+        sb.append("===============================\n\n");
+        sb.append("Customer: ").append(customer.getFullName()).append("\n");
+        sb.append("Hall: ").append(hall.getName()).append(" (").append(hall.getType()).append(")\n");
+        sb.append("Start: ").append(start.toString()).append("\n");
+        sb.append("End:   ").append(end.toString()).append("\n");
+        sb.append("-------------------------------\n");
+        sb.append("TOTAL PAID:  RM ").append(String.format("%.2f", total)).append("\n");
+        sb.append("-------------------------------\n\n");
+        sb.append("      Thank you for booking!   \n");
+        
+        area.setText(sb.toString());
+        receiptFrame.add(new JScrollPane(area), BorderLayout.CENTER);
+        receiptFrame.setLocationRelativeTo(this);
+        receiptFrame.setVisible(true);
     }
 }

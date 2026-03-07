@@ -1,6 +1,7 @@
 package com.hallsymphony.service;
 
 import com.hallsymphony.model.Booking;
+import com.hallsymphony.model.Schedule;
 import com.hallsymphony.util.DataStorage;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -35,6 +36,21 @@ public class BookingService {
                 .anyMatch(b -> start.isBefore(b.getEndTime()) && end.isAfter(b.getStartTime()));
 
         if (overlap) return false;
+
+        // Validation: Overlap check with maintenance
+        List<Schedule> schedules = HallService.getAllSchedules();
+        boolean maintenanceOverlap = schedules.stream()
+                .filter(s -> s.getHallId().equals(hallId) && s.getType().equals("MAINTENANCE"))
+                .anyMatch(s -> start.isBefore(s.getEndTime()) && end.isAfter(s.getStartTime()));
+
+        if (maintenanceOverlap) return false;
+
+        // Validation: Check if within availability set by scheduler
+        boolean available = schedules.stream()
+                .filter(s -> s.getHallId().equals(hallId) && s.getType().equals("AVAILABILITY"))
+                .anyMatch(s -> !start.isBefore(s.getStartTime()) && !end.isAfter(s.getEndTime()));
+
+        if (!available) return false;
 
         String id = "BOOK" + (bookings.size() + 1);
         Booking booking = new Booking(id, customerId, hallId, start, end, price, "PENDING", remarks);

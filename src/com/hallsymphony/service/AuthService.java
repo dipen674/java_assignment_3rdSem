@@ -62,4 +62,32 @@ public class AuthService {
         }
         return false;
     }
+
+    public static boolean updateProfile(String userId, String fullName, String contact) {
+        List<User> users = getAllUsers();
+        boolean found = false;
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                u.setFullName(fullName);
+                u.setContact(contact);
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            DataStorage.saveList(USER_FILE, users);
+        }
+        return found;
+    }
+
+    public static boolean deleteUser(String userId) {
+        List<User> users = getAllUsers();
+        int initialSize = users.size();
+        users.removeIf(u -> u.getId().equals(userId));
+        if (users.size() < initialSize) {
+            DataStorage.saveList(USER_FILE, users);
+            return true;
+        }
+        return false;
+    }
 }

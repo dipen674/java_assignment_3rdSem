@@ -1,0 +1,3 @@
+HALL1|Grand Auditorium|Auditorium|1000|300.0|Large hall for conferences
+HALL2|Royal Banquet|Banquet Hall|300|100.0|Perfect for weddings
+HALL3|Meeting Room A|Meeting Room|30|50.0|Small room for discussions

@@ -61,7 +61,15 @@ public class ManagerDashboard extends BaseDashboard {
         DefaultTableModel model = new DefaultTableModel(columns, 0);
         JTable table = new JTable(model);
 
-        refreshIssueTable(model);
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField searchField = new JTextField(15);
+        JButton searchBtn = new JButton("Filter");
+        filterPanel.add(new JLabel("Search Issues:"));
+        filterPanel.add(searchField);
+        filterPanel.add(searchBtn);
+        searchBtn.addActionListener(e -> refreshIssueTable(model, searchField.getText()));
+
+        refreshIssueTable(model, "");
 
         JButton assignBtn = new JButton("Assign Scheduler");
         assignBtn.addActionListener(e -> {
@@ -71,18 +79,38 @@ public class ManagerDashboard extends BaseDashboard {
                 String staffId = JOptionPane.showInputDialog("Enter Scheduler ID to assign:");
                 if (staffId != null) {
                     IssueService.updateIssueStatus(issueId, "IN_PROGRESS", staffId);
-                    refreshIssueTable(model);
+                    refreshIssueTable(model, searchField.getText());
                 }
             }
         });
 
+        JButton statusBtn = new JButton("Update Status");
+        statusBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                String issueId = (String) model.getValueAt(row, 0);
+                String[] statuses = {"IN_PROGRESS", "DONE", "CLOSED", "CANCELLED"};
+                String status = (String) JOptionPane.showInputDialog(null, "Select Status", "Update Status", JOptionPane.QUESTION_MESSAGE, null, statuses, statuses[0]);
+                if (status != null) {
+                    IssueService.updateIssueStatus(issueId, status, null);
+                    refreshIssueTable(model, searchField.getText());
+                }
+            }
+        });
+
+        JPanel btnPanel = new JPanel();
+        btnPanel.add(assignBtn); btnPanel.add(statusBtn);
+
+        panel.add(filterPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
-        panel.add(assignBtn, BorderLayout.SOUTH);
+        panel.add(btnPanel, BorderLayout.SOUTH);
         return panel;
     }
 
-    private void refreshIssueTable(DefaultTableModel model) {
+    private void refreshIssueTable(DefaultTableModel model, String filter) {
         model.setRowCount(0);
-        IssueService.getAllIssues().forEach(i -> model.addRow(new Object[]{i.getId(), i.getDescription(), i.getAssignedTo(), i.getStatus()}));
+        IssueService.getAllIssues().stream()
+                .filter(i -> filter.isEmpty() || i.getDescription().toLowerCase().contains(filter.toLowerCase()))
+                .forEach(i -> model.addRow(new Object[]{i.getId(), i.getDescription(), i.getAssignedTo(), i.getStatus()}));
     }
 }

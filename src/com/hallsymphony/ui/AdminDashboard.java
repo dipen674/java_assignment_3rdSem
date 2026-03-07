@@ -35,30 +35,71 @@ public class AdminDashboard extends BaseDashboard {
         DefaultTableModel model = new DefaultTableModel(columns, 0);
         JTable table = new JTable(model);
 
-        refreshStaffTable(model);
+        refreshStaffTable(model, "");
 
-        JButton addBtn = new JButton("Add Scheduler Staff");
-        addBtn.addActionListener(e -> {
-            JTextField uField = new JTextField();
-            JTextField pField = new JTextField();
-            JTextField nField = new JTextField();
-            JTextField cField = new JTextField();
-            Object[] message = { "Username:", uField, "Password:", pField, "Name:", nField, "Contact:", cField };
-            if (JOptionPane.showConfirmDialog(null, message, "Add Staff", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                AuthService.addStaff(uField.getText(), pField.getText(), nField.getText(), cField.getText(), "Scheduler");
-                refreshStaffTable(model);
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField searchField = new JTextField(15);
+        JButton searchBtn = new JButton("Filter");
+        filterPanel.add(new JLabel("Search Staff:"));
+        filterPanel.add(searchField);
+        filterPanel.add(searchBtn);
+        searchBtn.addActionListener(e -> refreshStaffTable(model, searchField.getText()));
+
+        JPanel btnPanel = new JPanel();
+        JButton addBtn = new JButton("Add Scheduler");
+        JButton editBtn = new JButton("Edit Staff");
+        JButton deleteBtn = new JButton("Delete");
+
+        addBtn.addActionListener(e -> showStaffForm(null, model));
+        editBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                String id = (String) model.getValueAt(row, 0);
+                User staff = AuthService.getAllUsers().stream().filter(u -> u.getId().equals(id)).findFirst().get();
+                showStaffForm(staff, model);
+            }
+        });
+        deleteBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                AuthService.deleteUser((String) model.getValueAt(row, 0));
+                refreshStaffTable(model, "");
             }
         });
 
+        btnPanel.add(addBtn); btnPanel.add(editBtn); btnPanel.add(deleteBtn);
+
+        panel.add(filterPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
-        panel.add(addBtn, BorderLayout.SOUTH);
+        panel.add(btnPanel, BorderLayout.SOUTH);
         return panel;
     }
 
-    private void refreshStaffTable(DefaultTableModel model) {
+    private void showStaffForm(User staff, DefaultTableModel model) {
+        JTextField uField = new JTextField(staff != null ? staff.getUsername() : "");
+        JTextField pField = new JTextField(staff != null ? staff.getPassword() : "");
+        JTextField nField = new JTextField(staff != null ? staff.getFullName() : "");
+        JTextField cField = new JTextField(staff != null ? staff.getContact() : "");
+        
+        Object[] message = { "Username:", uField, "Password:", pField, "Name:", nField, "Contact:", cField };
+        String title = staff == null ? "Add Scheduler" : "Edit Staff";
+        
+        if (JOptionPane.showConfirmDialog(null, message, title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            if (staff == null) {
+                AuthService.addStaff(uField.getText(), pField.getText(), nField.getText(), cField.getText(), "Scheduler");
+            } else {
+                AuthService.updateProfile(staff.getId(), nField.getText(), cField.getText());
+                // In a real app, you might also update username/password
+            }
+            refreshStaffTable(model, "");
+        }
+    }
+
+    private void refreshStaffTable(DefaultTableModel model, String filter) {
         model.setRowCount(0);
         AuthService.getAllUsers().stream()
                 .filter(u -> u instanceof Scheduler)
+                .filter(u -> filter.isEmpty() || u.getFullName().toLowerCase().contains(filter.toLowerCase()) || u.getUsername().toLowerCase().contains(filter.toLowerCase()))
                 .forEach(u -> model.addRow(new Object[]{u.getId(), u.getUsername(), u.getRole(), u.getFullName()}));
     }
 
@@ -68,14 +109,39 @@ public class AdminDashboard extends BaseDashboard {
         DefaultTableModel model = new DefaultTableModel(columns, 0);
         JTable table = new JTable(model);
 
-        refreshUserTable(model);
-        panel.add(new JScrollPane(table));
+        refreshUserTable(model, "");
+        
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField searchField = new JTextField(15);
+        JButton searchBtn = new JButton("Filter");
+        filterPanel.add(new JLabel("Search Users:"));
+        filterPanel.add(searchField);
+        filterPanel.add(searchBtn);
+        searchBtn.addActionListener(e -> refreshUserTable(model, searchField.getText()));
+
+        JButton deleteUserBtn = new JButton("Delete User");
+        deleteUserBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                String id = (String) model.getValueAt(row, 0);
+                if (AuthService.deleteUser(id)) {
+                    JOptionPane.showMessageDialog(this, "User deleted successfully!");
+                    refreshUserTable(model, "");
+                }
+            }
+        });
+
+        panel.add(filterPanel, BorderLayout.NORTH);
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        panel.add(deleteUserBtn, BorderLayout.SOUTH);
         return panel;
     }
 
-    private void refreshUserTable(DefaultTableModel model) {
+    private void refreshUserTable(DefaultTableModel model, String filter) {
         model.setRowCount(0);
-        AuthService.getAllUsers().forEach(u -> model.addRow(new Object[]{u.getId(), u.getUsername(), u.getRole(), "Active"}));
+        AuthService.getAllUsers().stream()
+                .filter(u -> filter.isEmpty() || u.getFullName().toLowerCase().contains(filter.toLowerCase()) || u.getUsername().toLowerCase().contains(filter.toLowerCase()))
+                .forEach(u -> model.addRow(new Object[]{u.getId(), u.getUsername(), u.getRole(), "Active"}));
     }
 
     private JPanel createCentralBookingPanel() {

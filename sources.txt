@@ -10,6 +10,7 @@ src/com/hallsymphony/ui/SchedulerDashboard.java
 src/com/hallsymphony/ui/MainFrame.java
 src/com/hallsymphony/ui/RegistrationPanel.java
 src/com/hallsymphony/model/Scheduler.java
+src/com/hallsymphony/model/Schedule.java
 src/com/hallsymphony/model/User.java
 src/com/hallsymphony/model/Hall.java
 src/com/hallsymphony/model/Customer.java

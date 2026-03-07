@@ -1,0 +1,8 @@
+# Java compilation output
+bin/
+*.class
+
+# Project specific
+sources.txt
+.DS_Store
+*.swp
