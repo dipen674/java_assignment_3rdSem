@@ -1,3 +1,6 @@
-HALL1|Grand Auditorium|Auditorium|1000|300.0|Large hall for conferences
-HALL2|Royal Banquet|Banquet Hall|300|100.0|Perfect for weddings
-HALL3|Meeting Room A|Meeting Room|30|50.0|Small room for discussions
+HALL1|Everest Grand Auditorium|Auditorium|1000|300.0|Prestigious auditorium for grand conferences and national events
+HALL2|Annapurna Banquet Hall|Banquet Hall|300|100.0|Elegant banquet hall perfect for weddings and receptions
+HALL3|Lumbini Meeting Room|Meeting Room|30|50.0|Cozy meeting room ideal for team discussions
+HALL4|Pokhara Convention Center|Auditorium|1000|300.0|Spacious auditorium with a stunning mountain view backdrop
+HALL5|Kathmandu Royal Banquet|Banquet Hall|300|100.0|Premium banquet hall located in the heart of Kathmandu
+HALL6|Patan Board Room|Meeting Room|30|50.0|Modern boardroom equipped with projector and whiteboard

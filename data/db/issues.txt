@@ -1,1 +1,7 @@
-
+ISSUE1|CUST5|BOOK1|Sound system had echo issues during the conference|DONE|SCH3
+ISSUE2|CUST6|BOOK2|Air conditioning was not working properly during the reception|IN_PROGRESS|SCH4
+ISSUE3|CUST8|BOOK4|Lighting was too dim in the banquet hall for the birthday event|OPEN|NONE
+ISSUE4|CUST9|BOOK5|Projector stopped working midway through the summit|IN_PROGRESS|SCH3
+ISSUE5|CUST11|BOOK7|WiFi connectivity was very poor during the workshop|OPEN|NONE
+ISSUE6|CUST7|BOOK3|Whiteboard markers were dried out and not replaced|CLOSED|SCH4
+ISSUE7|CUST10|BOOK6|Water dispenser was empty in the boardroom|DONE|SCH3

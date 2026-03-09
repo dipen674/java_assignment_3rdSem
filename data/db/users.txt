@@ -1,4 +1,13 @@
-ADM1|admin|admin123|Administrator|System Admin|0123456789
-MAN2|manager|manager123|Manager|Chief Manager|0123456788
-SCH3|staff|staff123|Scheduler|Lead Scheduler|0123456787
-CUST4|Dipen|dipen|Customer|Dipen|9822611896
+ADM1|admin|admin123|Administrator|Deependra Adhikari|9841234567
+MAN2|manager|manager123|Manager|Rajesh Hamal|9851234568
+SCH3|staff|staff123|Scheduler|Suman Shrestha|9861234569
+SCH4|bikash|bikash123|Scheduler|Bikash Tamang|9871234570
+CUST5|dipen|dipen123|Customer|Dipen Bhatta|9822611896
+CUST6|dixita|dixita123|Customer|Dixita Sharma|9801234571
+CUST7|anchita|anchita123|Customer|Anchita Gurung|9812345672
+CUST8|priya|priya123|Customer|Priya Maharjan|9823456783
+CUST9|aarav|aarav123|Customer|Aarav Thapa|9834567894
+CUST10|sunita|sunita123|Customer|Sunita Rai|9845678905
+CUST11|bishal|bishal123|Customer|Bishal Bhattarai|9856789016
+CUST12|nisha|nisha123|Customer|Nisha Poudel|9867890127
+SCH13|ramesh|ramesh123|Scheduler|Ramesh Adhikari|9845152378
