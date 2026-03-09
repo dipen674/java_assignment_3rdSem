@@ -209,6 +209,7 @@ UI Layer   →  Service Layer  →  DataStorage (util)  →  .txt files
 Java_Assignment/
 │
 ├── run.sh                        # Shell script to compile & run (Linux/macOS)
+├── run.bat                       # Batch script to compile & run (Windows)
 ├── sources.txt                   # Auto-generated list of .java files (used by javac)
 ├── .gitignore
 │
@@ -272,10 +273,12 @@ Stores all users — customers and staff alike — distinguished by the `role` f
 
 **Example:**
 ```
-ADM1|admin|admin123|Administrator|System Admin|0123456789
-MAN2|manager|manager123|Manager|Chief Manager|0123456788
-SCH3|staff|staff123|Scheduler|Lead Scheduler|0123456787
-CUST4|john|pass123|Customer|John Doe|0123456786
+ADM1|admin|admin123|Administrator|Deependra Adhikari|9841234567
+MAN2|manager|manager123|Manager|Rajesh Hamal|9851234568
+SCH3|staff|staff123|Scheduler|Suman Shrestha|9861234569
+CUST5|dipen|dipen123|Customer|Dipen Bhatta|9822611896
+CUST6|dixita|dixita123|Customer|Dixita Sharma|9801234571
+CUST7|anchita|anchita123|Customer|Anchita Gurung|9812345672
 ```
 
 ---
@@ -287,9 +290,12 @@ Stores hall definitions.
 
 **Example:**
 ```
-HALL1|Grand Auditorium|Auditorium|1000|300.0|Large hall for conferences
-HALL2|Royal Banquet|Banquet Hall|300|100.0|Perfect for weddings
-HALL3|Meeting Room A|Meeting Room|30|50.0|Small room for discussions
+HALL1|Everest Grand Auditorium|Auditorium|1000|300.0|Prestigious auditorium for grand conferences
+HALL2|Annapurna Banquet Hall|Banquet Hall|300|100.0|Elegant banquet hall perfect for weddings
+HALL3|Lumbini Meeting Room|Meeting Room|30|50.0|Cozy meeting room ideal for discussions
+HALL4|Pokhara Convention Center|Auditorium|1000|300.0|Spacious auditorium with mountain view
+HALL5|Kathmandu Royal Banquet|Banquet Hall|300|100.0|Premium banquet hall in Kathmandu
+HALL6|Patan Board Room|Meeting Room|30|50.0|Modern boardroom with projector
 ```
 
 ---
@@ -316,8 +322,9 @@ Stores all booking transactions. Created automatically when the first booking is
 
 **Example:**
 ```
-BOOK1|CUST4|HALL1|2024-07-15T09:00|2024-07-15T12:00|900.0|PAID|Annual conference
-BOOK2|CUST4|HALL2|2024-07-20T14:00|2024-07-20T17:00|300.0|CANCELLED|
+BOOK1|CUST5|HALL1|2024-07-10T09:00:00|2024-07-10T13:00:00|1200.0|PAID|Nepal IT Conference 2024
+BOOK2|CUST6|HALL2|2024-07-12T10:00:00|2024-07-12T16:00:00|600.0|PAID|Ramita Wedding Reception
+BOOK3|CUST7|HALL3|2024-07-14T08:00:00|2024-07-14T10:00:00|100.0|PAID|Anchita Team Strategy Meeting
 ```
 
 ---
@@ -332,7 +339,9 @@ Stores customer-raised issues linked to a specific booking.
 
 **Example:**
 ```
-ISSUE1|CUST4|BOOK1|A/C not working in Grand Auditorium|IN_PROGRESS|SCH3
+ISSUE1|CUST5|BOOK1|Sound system had echo issues during the conference|DONE|SCH3
+ISSUE2|CUST6|BOOK2|Air conditioning was not working properly|IN_PROGRESS|SCH4
+ISSUE3|CUST8|BOOK4|Lighting was too dim in the banquet hall|OPEN|NONE
 ```
 
 ---
@@ -353,15 +362,23 @@ ISSUE1|CUST4|BOOK1|A/C not working in Grand Auditorium|IN_PROGRESS|SCH3
 
 ---
 
-### Option A: Using the Shell Script (Linux / macOS only)
+### Option A: Using a Script (Recommended — One Command!)
 
+#### 🐧 Linux / macOS
 ```bash
 cd /path/to/Java_Assignment
 chmod +x run.sh
 ./run.sh
 ```
 
-This script automatically compiles all source files and launches the application.
+#### 🪟 Windows
+```cmd
+cd C:\path\to\Java_Assignment
+run.bat
+```
+Or simply **double-click** `run.bat` in File Explorer!
+
+Both scripts automatically compile all source files and launch the application.
 
 ---
 
@@ -427,14 +444,25 @@ If you run `java` from inside the `src/` or `bin/` folder, the application will 
 
 ## 🔑 Default Login Credentials
 
-These accounts are automatically created by `DataInitializer.java` the first time the application is launched (when `data/db/users.txt` is empty).
+These accounts are pre-loaded in `data/db/users.txt`.
 
-| Role          | Username  | Password     |
-|---------------|-----------|--------------|
-| Administrator | `admin`   | `admin123`   |
-| Manager       | `manager` | `manager123` |
-| Scheduler     | `staff`   | `staff123`   |
-| Customer      | *(self-register via the Registration screen)* | |
+| Role          | Username   | Password      | Full Name           |
+|---------------|------------|---------------|---------------------|
+| Administrator | `admin`    | `admin123`    | Deependra Adhikari  |
+| Manager       | `manager`  | `manager123`  | Rajesh Hamal        |
+| Scheduler     | `staff`    | `staff123`    | Suman Shrestha      |
+| Scheduler     | `bikash`   | `bikash123`   | Bikash Tamang       |
+| Scheduler     | `ramesh`   | `ramesh123`   | Ramesh Adhikari     |
+| Customer      | `dipen`    | `dipen123`    | Dipen Bhatta        |
+| Customer      | `dixita`   | `dixita123`   | Dixita Sharma       |
+| Customer      | `anchita`  | `anchita123`  | Anchita Gurung      |
+| Customer      | `priya`    | `priya123`    | Priya Maharjan      |
+| Customer      | `aarav`    | `aarav123`    | Aarav Thapa         |
+| Customer      | `sunita`   | `sunita123`   | Sunita Rai          |
+| Customer      | `bishal`   | `bishal123`   | Bishal Bhattarai    |
+| Customer      | `nisha`    | `nisha123`    | Nisha Poudel        |
+
+> 💡 New customers can also self-register via the Registration screen.
 
 > ⚠️ **Note:** Passwords are stored in plain text in `users.txt` as this is an academic project with no database. In a production system, passwords would always be hashed (e.g., bcrypt).
 
