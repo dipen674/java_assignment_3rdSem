@@ -38,7 +38,7 @@ public class BookingService {
         return maxId + 1;
     }
 
-    public static boolean createBooking(String customerId, String hallId, LocalDateTime start, LocalDateTime end, double price, String remarks) {
+    public static synchronized boolean createBooking(String customerId, String hallId, LocalDateTime start, LocalDateTime end, double price, String remarks) {
         // Validation: start must be before end
         if (!start.isBefore(end)) {
             return false;
@@ -83,8 +83,8 @@ public class BookingService {
         List<Booking> bookings = getAllBookings();
         for (Booking b : bookings) {
             if (b.getId().equals(bookingId)) {
-                // Must be at least 3 days before
-                if (LocalDateTime.now().plusDays(3).isAfter(b.getStartTime())) {
+                // Production-grade: Must be at least 72 hours (3 full days) before event starts
+                if (java.time.Duration.between(LocalDateTime.now(), b.getStartTime()).toHours() < 72) {
                     return false;
                 }
                 b.setStatus("CANCELLED");

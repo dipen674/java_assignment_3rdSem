@@ -67,21 +67,21 @@ public class LoginPanel extends JPanel {
         content.setOpaque(false);
         content.setBorder(new EmptyBorder(0, 48, 0, 48));
 
-        JLabel icon = new JLabel("\uD83C\uDFDB");
-        icon.setFont(new Font("Dialog", Font.PLAIN, 64));
+        JLabel icon = new JLabel("H"); // Simple branding letter
+        icon.setFont(StyleConfig.BRAND_LOGO);
         icon.setAlignmentX(Component.CENTER_ALIGNMENT);
         content.add(icon);
         content.add(Box.createVerticalStrut(24));
 
         JLabel title = new JLabel("Hall Symphony");
-        title.setFont(new Font("Dialog", Font.BOLD, 30));
+        title.setFont(StyleConfig.BRAND_TITLE);
         title.setForeground(Color.WHITE);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         content.add(title);
         content.add(Box.createVerticalStrut(10));
 
         JLabel subtitle = new JLabel("<html><center>Hall Booking Management<br>System</center></html>");
-        subtitle.setFont(new Font("Dialog", Font.PLAIN, 15));
+        subtitle.setFont(StyleConfig.NORMAL_FONT);
         subtitle.setForeground(new Color(147, 197, 253)); // Blue-300
         subtitle.setHorizontalAlignment(SwingConstants.CENTER);
         subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -89,13 +89,13 @@ public class LoginPanel extends JPanel {
         content.add(Box.createVerticalStrut(40));
 
         // Feature pills
-        String[] features = { "✓  Multi-role access control", "✓  Real-time availability", "✓  Instant receipts" };
+        String[] features = { "* Multi-role access control", "* Real-time availability", "* Instant receipts" };
         for (String f : features) {
             JPanel pill = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
             pill.setOpaque(false);
             pill.setAlignmentX(Component.CENTER_ALIGNMENT);
             JLabel lbl = new JLabel(f);
-            lbl.setFont(new Font("Dialog", Font.PLAIN, 13));
+            lbl.setFont(StyleConfig.SMALL_FONT);
             lbl.setForeground(new Color(186, 230, 253)); // Blue-200
             pill.add(lbl);
             content.add(pill);
@@ -119,14 +119,14 @@ public class LoginPanel extends JPanel {
 
         // Header
         JLabel greeting = new JLabel("Welcome back \uD83D\uDC4B");
-        greeting.setFont(new Font("Dialog", Font.PLAIN, 14));
+        greeting.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         greeting.setForeground(StyleConfig.TEXT_MUTED);
         greeting.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(greeting);
         form.add(Box.createVerticalStrut(6));
 
         JLabel heading = new JLabel("Sign in to continue");
-        heading.setFont(new Font("Dialog", Font.BOLD, 26));
+        heading.setFont(new Font("Segoe UI", Font.BOLD, 26));
         heading.setForeground(StyleConfig.TEXT_COLOR);
         heading.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(heading);
@@ -158,7 +158,7 @@ public class LoginPanel extends JPanel {
 
         // Sign In button
         HallButton loginBtn = HallButton.primary("Sign In →");
-        loginBtn.setFont(new Font("Dialog", Font.BOLD, 15));
+        loginBtn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         loginBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         loginBtn.addActionListener(e -> handleLogin());
@@ -203,7 +203,7 @@ public class LoginPanel extends JPanel {
     /** Creates a styled, borderless flat input field with a bottom-line accent. */
     private JTextField createStyledInput(boolean isPassword) {
         JTextField field = isPassword ? new JPasswordField() : new JTextField();
-        field.setFont(new Font("Dialog", Font.PLAIN, 15));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         field.setForeground(StyleConfig.TEXT_COLOR);
         field.setBackground(StyleConfig.PRIMARY_XLIGHT);
         field.setCaretColor(StyleConfig.PRIMARY_COLOR);
@@ -246,7 +246,7 @@ public class LoginPanel extends JPanel {
     // Exposes the factory method for RegistrationPanel to reuse
     static JTextField createInput(boolean isPassword) {
         JTextField field = isPassword ? new JPasswordField() : new JTextField();
-        field.setFont(new Font("Dialog", Font.PLAIN, 15));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         field.setForeground(StyleConfig.TEXT_COLOR);
         field.setBackground(StyleConfig.PRIMARY_XLIGHT);
         field.setCaretColor(StyleConfig.PRIMARY_COLOR);
@@ -281,12 +281,20 @@ public class LoginPanel extends JPanel {
 
     private void handleLogin() {
         String username = userField.getText().trim();
-        String password = new String(passField.getPassword());
+        String password = new String(passField.getPassword()).trim();
+        
         if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter both username and password.",
                 "Validation Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        if (username.length() > 50 || password.length() > 50) {
+            JOptionPane.showMessageDialog(this, "Credentials are too long.",
+                "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         AuthService.login(username, password).ifPresentOrElse(
             user -> frame.loginSuccess(user),
             () -> JOptionPane.showMessageDialog(this, "Invalid username or password.",

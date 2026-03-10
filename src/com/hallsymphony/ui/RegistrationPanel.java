@@ -2,6 +2,7 @@ package com.hallsymphony.ui;
 
 import com.hallsymphony.service.AuthService;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.util.ValidationUtil;
 import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -56,34 +57,34 @@ public class RegistrationPanel extends JPanel {
         content.setOpaque(false);
         content.setBorder(new EmptyBorder(0, 48, 0, 48));
 
-        JLabel icon = new JLabel("\uD83D\uDCDD");
-        icon.setFont(new Font("Dialog", Font.PLAIN, 64));
+        JLabel icon = new JLabel("H");
+        icon.setFont(StyleConfig.BRAND_LOGO);
         icon.setAlignmentX(Component.CENTER_ALIGNMENT);
         content.add(icon);
         content.add(Box.createVerticalStrut(24));
 
         JLabel title = new JLabel("Join Hall Symphony");
-        title.setFont(new Font("Dialog", Font.BOLD, 28));
+        title.setFont(StyleConfig.TITLE_FONT);
         title.setForeground(Color.WHITE);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         content.add(title);
         content.add(Box.createVerticalStrut(10));
 
         JLabel subtitle = new JLabel("<html><center>Create your account and start<br>booking halls instantly</center></html>");
-        subtitle.setFont(new Font("Dialog", Font.PLAIN, 14));
+        subtitle.setFont(StyleConfig.TABLE_FONT);
         subtitle.setForeground(new Color(167, 243, 208)); // Green-200
         subtitle.setHorizontalAlignment(SwingConstants.CENTER);
         subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         content.add(subtitle);
         content.add(Box.createVerticalStrut(40));
 
-        String[] features = { "✓  Free customer account", "✓  Book any available hall", "✓  Instant booking receipt" };
+        String[] features = { "* Free customer account", "* Book any available hall", "* Instant booking receipt" };
         for (String f : features) {
             JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
             row.setOpaque(false);
             row.setAlignmentX(Component.CENTER_ALIGNMENT);
             JLabel lbl = new JLabel(f);
-            lbl.setFont(new Font("Dialog", Font.PLAIN, 13));
+            lbl.setFont(StyleConfig.SMALL_FONT);
             lbl.setForeground(new Color(187, 247, 208));
             row.add(lbl);
             content.add(row);
@@ -106,14 +107,14 @@ public class RegistrationPanel extends JPanel {
         form.setMaximumSize(new Dimension(400, Integer.MAX_VALUE));
 
         JLabel greeting = new JLabel("Get started \uD83C\uDF89");
-        greeting.setFont(new Font("Dialog", Font.PLAIN, 14));
+        greeting.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         greeting.setForeground(StyleConfig.TEXT_MUTED);
         greeting.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(greeting);
         form.add(Box.createVerticalStrut(6));
 
         JLabel heading = new JLabel("Create your account");
-        heading.setFont(new Font("Dialog", Font.BOLD, 26));
+        heading.setFont(new Font("Segoe UI", Font.BOLD, 26));
         heading.setForeground(StyleConfig.TEXT_COLOR);
         heading.setAlignmentX(Component.LEFT_ALIGNMENT);
         form.add(heading);
@@ -141,14 +142,18 @@ public class RegistrationPanel extends JPanel {
         form.add(makeLabel("Contact Number"));
         form.add(Box.createVerticalStrut(5));
         contactField = LoginPanel.createInput(false);
-        form.add(contactField);
-        form.add(Box.createVerticalStrut(28));
-
+        
         HallButton regBtn = HallButton.success("Create Account →");
-        regBtn.setFont(new Font("Dialog", Font.BOLD, 15));
+        regBtn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         regBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
         regBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         regBtn.addActionListener(e -> handleRegistration());
+        
+        nameField.addActionListener(e -> userField.requestFocusInWindow());
+        userField.addActionListener(e -> passField.requestFocusInWindow());
+        passField.addActionListener(e -> contactField.requestFocusInWindow());
+        contactField.addActionListener(e -> regBtn.doClick());
+
         form.add(regBtn);
         form.add(Box.createVerticalStrut(18));
 
@@ -185,8 +190,19 @@ public class RegistrationPanel extends JPanel {
         String contact  = contactField.getText().trim();
 
         if (fullName.isEmpty() || username.isEmpty() || password.isEmpty() || contact.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all fields.",
-                "Validation Error", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Missing Information", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        StringBuilder errors = new StringBuilder();
+        if (!ValidationUtil.isValidName(fullName)) errors.append("\u2022 Name should only contain letters.\n");
+        if (!ValidationUtil.isValidUsername(username)) errors.append("\u2022 Username must be 4-20 chars (letters, numbers, underscores).\n");
+        if (!ValidationUtil.isValidPassword(password)) errors.append("\u2022 Password must be at least 6 characters long.\n");
+        if (!ValidationUtil.isValidContact(contact)) errors.append("\u2022 Contact must be 10-12 digits (numeric only).\n");
+
+        if (errors.length() > 0) {
+            JOptionPane.showMessageDialog(this, "Please correct the following errors:\n" + errors.toString(),
+                "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -195,8 +211,7 @@ public class RegistrationPanel extends JPanel {
                 "Success \uD83C\uDF89", JOptionPane.INFORMATION_MESSAGE);
             frame.showScreen("LOGIN");
         } else {
-            JOptionPane.showMessageDialog(this,
-                "Username already exists. Please choose a different one.",
+            JOptionPane.showMessageDialog(this, "Username already exists. Please choose another.",
                 "Registration Failed", JOptionPane.ERROR_MESSAGE);
         }
     }

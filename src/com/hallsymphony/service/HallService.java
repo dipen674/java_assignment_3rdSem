@@ -33,14 +33,14 @@ public class HallService {
         return maxId + 1;
     }
 
-    public static boolean addHall(String name, String type, int capacity, double rate, String description) {
+    public static synchronized boolean addHall(String name, String type, int capacity, double rate, String description) {
         String id = "HALL" + getNextHallId();
         Hall hall = new Hall(id, name, type, capacity, rate, description);
         DataStorage.appendToFile(HALL_FILE, hall);
         return true;
     }
 
-    public static boolean updateHall(Hall updatedHall) {
+    public static synchronized boolean updateHall(Hall updatedHall) {
         List<Hall> halls = getAllHalls();
         boolean found = false;
         for (int i = 0; i < halls.size(); i++) {
@@ -56,7 +56,7 @@ public class HallService {
         return found;
     }
 
-    public static boolean deleteHall(String hallId) {
+    public static synchronized boolean deleteHall(String hallId) {
         List<Hall> halls = getAllHalls();
         int initialSize = halls.size();
         halls.removeIf(h -> h.getId().equals(hallId));
@@ -94,7 +94,7 @@ public class HallService {
         return maxId + 1;
     }
 
-    public static boolean addSchedule(Schedule schedule) {
+    public static synchronized boolean addSchedule(Schedule schedule) {
         List<Schedule> schedules = getAllSchedules();
         // Check for maintenance overlapping
         if (schedule.getType().equals("MAINTENANCE")) {
@@ -108,7 +108,7 @@ public class HallService {
         return true;
     }
 
-    public static boolean deleteSchedule(String scheduleId) {
+    public static synchronized boolean deleteSchedule(String scheduleId) {
         List<Schedule> schedules = getAllSchedules();
         int initialSize = schedules.size();
         schedules.removeIf(s -> s.getId().equals(scheduleId));

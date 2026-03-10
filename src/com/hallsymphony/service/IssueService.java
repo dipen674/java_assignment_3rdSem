@@ -35,14 +35,14 @@ public class IssueService {
         return maxId + 1;
     }
 
-    public static boolean raiseIssue(String customerId, String bookingId, String description) {
+    public static synchronized boolean raiseIssue(String customerId, String bookingId, String description) {
         String id = "ISSUE" + getNextIssueId();
         Issue issue = new Issue(id, customerId, bookingId, description, "OPEN", null);
         DataStorage.appendToFile(ISSUE_FILE, issue);
         return true;
     }
 
-    public static boolean updateIssueStatus(String issueId, String status, String assignedTo) {
+    public static synchronized boolean updateIssueStatus(String issueId, String status, String assignedTo) {
         List<Issue> issues = getAllIssues();
         boolean found = false;
         for (Issue i : issues) {

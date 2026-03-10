@@ -3,13 +3,15 @@ package com.hallsymphony.ui;
 import com.hallsymphony.model.*;
 import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.util.ValidationUtil;
 import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
 import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
 import com.hallsymphony.ui.components.HallButton;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 import java.awt.*;
+import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -22,10 +24,11 @@ public class SchedulerDashboard extends BaseDashboard {
         initContent();
     }
 
+    @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "  Manage Halls", "HALLS");
-        addSidebarButton(sidebar, "  Scheduling", "SCHEDULING");
-        addSidebarButton(sidebar, "  Maintenance", "MAINTENANCE");
+        addSidebarButton(sidebar, "Manage Halls", "HALLS");
+        addSidebarButton(sidebar, "Scheduling", "SCHEDULING");
+        addSidebarButton(sidebar, "Maintenance", "MAINTENANCE");
     }
 
     private void initContent() {
@@ -54,6 +57,11 @@ public class SchedulerDashboard extends BaseDashboard {
         filterPanel.add(new JLabel("Search: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
+        
+        filterPanel.add(Box.createHorizontalStrut(20));
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"ID", "Name", "Capacity", "Rate"});
+        filterPanel.add(sortBox);
 
         JPanel headerArea = new JPanel(new BorderLayout());
         headerArea.setBackground(StyleConfig.BACKGROUND_COLOR);
@@ -69,6 +77,13 @@ public class SchedulerDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshHallTable(model, "");
         searchBtn.addActionListener(e -> refreshHallTable(model, searchField.getText()));
+        searchField.addActionListener(e -> searchBtn.doClick());
+
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 0 : (sortBox.getSelectedIndex() == 1 ? 1 : (sortBox.getSelectedIndex() == 2 ? 3 : 4));
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, SortOrder.ASCENDING)));
+        });
+
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
         // Buttons
@@ -149,23 +164,38 @@ public class SchedulerDashboard extends BaseDashboard {
         String title = hall == null ? "Add New Hall" : "Edit Hall";
         int option = JOptionPane.showConfirmDialog(this, formPanel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
-            try {
-                String name = nameField.getText().trim();
-                String type = (String) typeBox.getSelectedItem();
-                int cap = Integer.parseInt(capField.getText().trim());
-                double rate = Double.parseDouble(rateField.getText().trim());
-                String desc = descField.getText().trim();
+            String name = nameField.getText().trim();
+            String type = (String) typeBox.getSelectedItem();
+            String capStr = capField.getText().trim();
+            String rateStr = rateField.getText().trim();
+            String desc = descField.getText().trim();
 
-                if (hall == null) {
-                    HallService.addHall(name, type, cap, rate, desc.isEmpty() ? "No description" : desc);
-                } else {
-                    hall.setName(name); hall.setType(type); hall.setCapacity(cap); hall.setRatePerHour(rate); hall.setDescription(desc);
-                    HallService.updateHall(hall);
-                }
-                refreshHallTable(model, searchField.getText());
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Capacity must be a number and rate must be a decimal.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            if (name.isEmpty() || capStr.isEmpty() || rateStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Name, Capacity and Rate are required.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+
+            if (!ValidationUtil.isValidCapacity(capStr)) {
+                JOptionPane.showMessageDialog(this, "Capacity must be a number between 1 and 10,000.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!ValidationUtil.isValidRate(rateStr)) {
+                JOptionPane.showMessageDialog(this, "Rate must be a positive decimal number.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int cap = Integer.parseInt(capStr);
+            double rate = Double.parseDouble(rateStr);
+
+            if (hall == null) {
+                HallService.addHall(name, type, cap, rate, desc.isEmpty() ? "No description" : desc);
+                JOptionPane.showMessageDialog(this, "Hall added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                hall.setName(name); hall.setType(type); hall.setCapacity(cap); hall.setRatePerHour(rate); hall.setDescription(desc);
+                HallService.updateHall(hall);
+                JOptionPane.showMessageDialog(this, "Hall updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+            refreshHallTable(model, searchField.getText());
         }
     }
 
@@ -178,6 +208,13 @@ public class SchedulerDashboard extends BaseDashboard {
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
         topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("Hall Schedules"), BorderLayout.WEST);
+        
+        JPanel filterPanel = StyleConfig.createFilterPanel();
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"Hall ID", "Start Time", "Type"});
+        filterPanel.add(sortBox);
+        topPanel.add(filterPanel, BorderLayout.EAST);
+        
         panel.add(topPanel, BorderLayout.NORTH);
 
         String[] columns = {"ID", "Hall ID", "Start", "End", "Type", "Remarks"};
@@ -186,6 +223,12 @@ public class SchedulerDashboard extends BaseDashboard {
         };
         JTable table = new JTable(model);
         refreshScheduleTable(model);
+        
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 1 : (sortBox.getSelectedIndex() == 1 ? 2 : 4);
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, SortOrder.ASCENDING)));
+        });
+
         table.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
@@ -252,28 +295,39 @@ public class SchedulerDashboard extends BaseDashboard {
 
         int option = JOptionPane.showConfirmDialog(this, formPanel, "Add Schedule", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
-            try {
-                String selectedHall = (String) hallBox.getSelectedItem();
-                String hallId = selectedHall.split(" - ")[0];
+            String startStr = startField.getText().trim();
+            String endStr = endField.getText().trim();
 
-                java.time.LocalDateTime start = java.time.LocalDateTime.parse(startField.getText().trim());
-                java.time.LocalDateTime end = java.time.LocalDateTime.parse(endField.getText().trim());
+            if (!ValidationUtil.isValidDateTime(startStr) || !ValidationUtil.isValidDateTime(endStr)) {
+                JOptionPane.showMessageDialog(this, "Invalid date format! Please use: yyyy-MM-ddTHH:mm:ss", "Format Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-                // Validation: start must be before end
-                if (!start.isBefore(end)) {
-                    JOptionPane.showMessageDialog(this, "Start time must be before end time.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+            java.time.LocalDateTime start = java.time.LocalDateTime.parse(startStr);
+            java.time.LocalDateTime end = java.time.LocalDateTime.parse(endStr);
 
-                String id = "SCH" + (HallService.getAllSchedules().size() + 1);
-                Schedule schedule = new Schedule(id, hallId, start, end, (String) typeBox.getSelectedItem(), remarkField.getText().trim());
-                if (HallService.addSchedule(schedule)) {
-                    refreshScheduleTable(model);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Schedule conflict detected!", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid date format!", "Error", JOptionPane.ERROR_MESSAGE);
+            if (!start.isBefore(end)) {
+                JOptionPane.showMessageDialog(this, "Start time must be before end time.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String selectedHall = (String) hallBox.getSelectedItem();
+            String hallId = selectedHall.split(" - ")[0];
+
+            int maxId = HallService.getAllSchedules().stream()
+                .mapToInt(s -> {
+                    try { return Integer.parseInt(s.getId().replaceAll("[^0-9]", "")); }
+                    catch (Exception ex) { return 0; }
+                })
+                .max().orElse(0);
+            
+            String id = "SCH" + (maxId + 1);
+            Schedule schedule = new Schedule(id, hallId, start, end, (String) typeBox.getSelectedItem(), remarkField.getText().trim());
+            if (HallService.addSchedule(schedule)) {
+                refreshScheduleTable(model);
+                JOptionPane.showMessageDialog(this, "Schedule added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Schedule conflict detected! Overlapping maintenance or availability.", "Conflict", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -287,6 +341,13 @@ public class SchedulerDashboard extends BaseDashboard {
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
         topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("My Assigned Maintenance Tasks"), BorderLayout.WEST);
+        
+        JPanel filterPanel = StyleConfig.createFilterPanel();
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"Issue ID", "Status"});
+        filterPanel.add(sortBox);
+        topPanel.add(filterPanel, BorderLayout.EAST);
+
         panel.add(topPanel, BorderLayout.NORTH);
 
         String[] columns = {"Issue ID", "Description", "Status"};
@@ -295,6 +356,12 @@ public class SchedulerDashboard extends BaseDashboard {
         };
         JTable table = new JTable(model);
         refreshMaintenanceTable(model);
+        
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 0 : 2;
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, SortOrder.ASCENDING)));
+        });
+
         table.getColumnModel().getColumn(2).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 

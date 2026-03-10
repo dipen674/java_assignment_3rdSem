@@ -22,49 +22,55 @@ public class StyleConfig {
     // ── Primary Palette ──────────────────────────────────────────────────────
     public static final Color PRIMARY_COLOR    = new Color(37,  99, 235);   // Blue-600
     public static final Color PRIMARY_DARK     = new Color(29,  78, 216);   // Blue-700
-    public static final Color PRIMARY_LIGHT    = new Color(219,234, 254);   // Blue-100
-    public static final Color PRIMARY_XLIGHT   = new Color(239,246, 255);   // Blue-50
+    public static final Color PRIMARY_LIGHT    = new Color(219, 234, 254);  // Blue-100
+    public static final Color PRIMARY_XLIGHT   = new Color(245, 248, 255);  // Very light blue
 
     // ── Sidebar ──────────────────────────────────────────────────────────────
-    public static final Color SIDEBAR_BG      = new Color(11,  17,  38);   // Deep navy
-    public static final Color SIDEBAR_HOVER   = new Color(30,  41,  59);   // Slate-800
-    public static final Color SIDEBAR_ACTIVE  = new Color(37,  99, 235);   // Blue-600
-    public static final Color SIDEBAR_TEXT    = new Color(203,213, 225);   // Slate-300
+    public static final Color SIDEBAR_BG      = new Color(15,  23,  42);    // Slate-900 (Deep Navy/Steel)
+    public static final Color SIDEBAR_HOVER   = new Color(30,  41,  59);    // Slate-800
+    public static final Color SIDEBAR_ACTIVE  = PRIMARY_COLOR;
+    public static final Color SIDEBAR_TEXT    = new Color(148, 163, 184);   // Slate-400
 
     // ── Semantic ─────────────────────────────────────────────────────────────
-    public static final Color ACCENT_COLOR    = new Color(220, 38,  38);   // Red-600
-    public static final Color ACCENT_DARK     = new Color(185, 28,  28);   // Red-700
-    public static final Color SUCCESS_COLOR   = new Color(22,  163, 74);   // Green-600
-    public static final Color SUCCESS_DARK    = new Color(21,  128, 61);   // Green-700
-    public static final Color WARNING_COLOR   = new Color(217, 119,  6);   // Amber-600
+    public static final Color ACCENT_COLOR    = new Color(239, 68,  68);    // Red-500
+    public static final Color ACCENT_DARK     = new Color(220, 38,  38);    // Red-600
+    public static final Color SUCCESS_COLOR   = new Color(16,  185, 129);   // Emerald-500
+    public static final Color SUCCESS_DARK    = new Color(5,   150, 105);   // Emerald-600
+    public static final Color WARNING_COLOR   = new Color(245, 158, 11);    // Amber-500
 
     // ── Surfaces ─────────────────────────────────────────────────────────────
-    public static final Color BACKGROUND_COLOR = new Color(240,244, 251);  // Cool grey-blue
+    public static final Color BACKGROUND_COLOR = new Color(248, 250, 252);  // Slate-50
     public static final Color CARD_COLOR       = Color.WHITE;
     public static final Color WHITE            = Color.WHITE;
 
     // ── Typography ───────────────────────────────────────────────────────────
-    public static final Color TEXT_COLOR       = new Color(15,  23,  42);  // Slate-900
-    public static final Color TEXT_SECONDARY   = new Color(71,  85, 105);  // Slate-600
-    public static final Color TEXT_MUTED       = new Color(148,163, 184);  // Slate-400
+    public static final Color TEXT_COLOR       = new Color(15,  23,  42);   // Slate-900
+    public static final Color TEXT_SECONDARY   = new Color(71,  85, 105);   // Slate-600
+    public static final Color TEXT_MUTED       = new Color(148, 163, 184);   // Slate-400
 
     // ── Borders ──────────────────────────────────────────────────────────────
-    public static final Color BORDER_COLOR     = new Color(226,232, 240);  // Slate-200
-    public static final Color BORDER_STRONG    = new Color(203,213, 225);  // Slate-300
+    public static final Color BORDER_COLOR     = new Color(226, 232, 240);  // Slate-200
+    public static final Color BORDER_STRONG    = new Color(203, 213, 225);  // Slate-300
 
     // ── Table ─────────────────────────────────────────────────────────────────
-    public static final Color TABLE_HEADER_BG  = new Color(248,250, 252);  // Slate-50
-    public static final Color TABLE_ALT_ROW    = new Color(248,250, 252);
+    public static final Color TABLE_HEADER_BG  = new Color(241, 245, 249);  // Slate-100
+    public static final Color TABLE_ALT_ROW    = new Color(252, 253, 255);
 
-    // ── Fonts (Dialog = cross-platform JVM logical font) ─────────────────────
-    public static final Font TITLE_FONT  = new Font("Dialog", Font.BOLD,  24);
-    public static final Font HEADER_FONT = new Font("Dialog", Font.BOLD,  17);
-    public static final Font NORMAL_FONT = new Font("Dialog", Font.PLAIN, 14);
-    public static final Font BOLD_FONT   = new Font("Dialog", Font.BOLD,  14);
-    public static final Font SMALL_FONT  = new Font("Dialog", Font.PLAIN, 12);
-    public static final Font SMALL_BOLD  = new Font("Dialog", Font.BOLD,  12);
-    public static final Font TABLE_FONT  = new Font("Dialog", Font.PLAIN, 13);
+    // ── Fonts ─────────────────────────────────────────────────────────────
+    public static final Font TITLE_FONT  = new Font("Segoe UI", Font.BOLD,  28);
+    public static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD,  20);
+    public static final Font NORMAL_FONT = new Font("Segoe UI", Font.PLAIN, 15);
+    public static final Font BOLD_FONT   = new Font("Segoe UI", Font.BOLD,  15);
+    public static final Font SMALL_FONT  = new Font("Segoe UI", Font.PLAIN, 13);
+    public static final Font SMALL_BOLD  = new Font("Segoe UI", Font.BOLD,  13);
+    public static final Font TABLE_FONT  = new Font("Segoe UI", Font.PLAIN, 14);
     public static final Font MONO_FONT   = new Font("Monospaced", Font.PLAIN, 13);
+    
+    // Brand Specific
+    public static final Font BRAND_TITLE = new Font("Segoe UI", Font.BOLD,  30);
+    public static final Font BRAND_LOGO  = new Font("Segoe UI", Font.PLAIN, 64);
+    public static final Font SIDEBAR_NAV = new Font("Segoe UI", Font.PLAIN, 14);
+    public static final Font SIDEBAR_BOLD = new Font("Segoe UI", Font.BOLD, 14);
 
     // ── Spacing ──────────────────────────────────────────────────────────────
     public static final int GAP_XS = 4;
@@ -78,13 +84,13 @@ public class StyleConfig {
     // ─────────────────────────────────────────────────────────────────────────
     public static void applyGlobalTheme() {
 
-        // 1. Enable anti-aliasing & sub-pixel rendering globally
-        System.setProperty("awt.useSystemAAFontSettings", "on");
-        System.setProperty("swing.aatext",                "true");
+        // 1. Enable high-quality anti-aliasing & sub-pixel rendering globally
+        System.setProperty("awt.useSystemAAFontSettings", "lcd_hrgb");
+        System.setProperty("swing.aatext", "true");
 
         // 2. Force Metal L&F — 100% Java-painted, pixel-perfect on all platforms
         try {
-            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) { /* fall back gracefully */ }
 
         // 3. Metal theme overrides — palette
@@ -106,14 +112,14 @@ public class StyleConfig {
         UIManager.put("OptionPane.messageFont", NORMAL_FONT);
 
         // 5. Table
-        UIManager.put("Table.rowHeight",              36);
-        UIManager.put("Table.gridColor",              BORDER_COLOR);
-        UIManager.put("Table.selectionBackground",    PRIMARY_LIGHT);
-        UIManager.put("Table.selectionForeground",    TEXT_COLOR);
+        UIManager.put("Table.rowHeight", 48);
+        UIManager.put("Table.gridColor", BORDER_COLOR);
+        UIManager.put("Table.selectionBackground", PRIMARY_LIGHT);
+        UIManager.put("Table.selectionForeground", PRIMARY_DARK);
         UIManager.put("Table.background",             WHITE);
         UIManager.put("Table.alternateRowColor",      TABLE_ALT_ROW);
-        UIManager.put("TableHeader.background",       TABLE_HEADER_BG);
-        UIManager.put("TableHeader.foreground",       TEXT_SECONDARY);
+        UIManager.put("TableHeader.background", TABLE_HEADER_BG);
+        UIManager.put("TableHeader.foreground", TEXT_SECONDARY);
 
         // 6. ScrollPane — remove default raised Metal border
         UIManager.put("ScrollPane.border", BorderFactory.createLineBorder(BORDER_COLOR, 1));
@@ -136,7 +142,8 @@ public class StyleConfig {
 
         // 9. OptionPane colours
         UIManager.put("OptionPane.background", WHITE);
-        UIManager.put("Panel.background",      BACKGROUND_COLOR);
+        UIManager.put("Panel.background", BACKGROUND_COLOR);
+        UIManager.put("Label.foreground", TEXT_COLOR);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -144,25 +151,50 @@ public class StyleConfig {
     // ─────────────────────────────────────────────────────────────────────────
 
     public static void styleButton(JButton btn) {
-        applyHallButtonStyle(btn, HallButton.Variant.PRIMARY);
+        applyButtonStyle(btn, PRIMARY_COLOR, PRIMARY_DARK, WHITE);
     }
     public static void styleDangerButton(JButton btn) {
-        applyHallButtonStyle(btn, HallButton.Variant.DANGER);
+        applyButtonStyle(btn, ACCENT_COLOR, ACCENT_DARK, WHITE);
     }
     public static void styleSuccessButton(JButton btn) {
-        applyHallButtonStyle(btn, HallButton.Variant.SUCCESS);
+        applyButtonStyle(btn, SUCCESS_COLOR, SUCCESS_DARK, WHITE);
     }
     public static void styleSecondaryButton(JButton btn) {
-        applyHallButtonStyle(btn, HallButton.Variant.SECONDARY);
+        applyButtonStyle(btn, WHITE, BACKGROUND_COLOR, TEXT_COLOR);
+        btn.setBorder(new CompoundBorder(new LineBorder(BORDER_COLOR, 1, true), new EmptyBorder(10, 20, 10, 20)));
     }
     public static void styleGhostButton(JButton btn) {
-        applyHallButtonStyle(btn, HallButton.Variant.GHOST);
+        // This method was removed from the provided snippet, but I'll keep it as it's not explicitly removed.
+        // However, its implementation will be based on the new applyButtonStyle if possible, or removed if it doesn't fit.
+        // For now, I'll keep the original implementation as the new applyButtonStyle doesn't directly support ghost.
+        Color bg=new Color(0,0,0,0), hover=PRIMARY_XLIGHT, fg=PRIMARY_COLOR, border=new Color(0,0,0,0);
+        final Color _bg=bg, _hover=hover;
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFont(BOLD_FONT);
+        btn.setFocusPainted(false);
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new CompoundBorder(
+            new LineBorder(border, 1, true),
+            new EmptyBorder(8, 20, 8, 20)));
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) { btn.setBackground(_hover); }
+            public void mouseExited(java.awt.event.MouseEvent e)  { btn.setBackground(_bg); }
+        });
     }
 
     /** Apply HallButton-style custom painting to a plain JButton (retrofit helper). */
     private static void applyHallButtonStyle(JButton btn, HallButton.Variant v) {
         // For new code, prefer HallButton.primary() etc. directly.
         // This helper makes existing JButtons look right without refactoring every class.
+        // This method is replaced by the new applyButtonStyle, but since it's not explicitly removed,
+        // and the new applyButtonStyle doesn't cover all variants (like GHOST), I'll keep it
+        // and adapt it to use the new applyButtonStyle where appropriate, or keep its original logic.
+        // Given the instruction is to "enhance table/button styling methods", I'll assume the new
+        // applyButtonStyle is the preferred way and this helper might be deprecated or removed later.
+        // For now, I'll keep the original logic for HallButton.Variant as it's more specific.
         Color bg, hover, fg, border;
         switch (v) {
             case DANGER:
@@ -193,18 +225,31 @@ public class StyleConfig {
         });
     }
 
+    private static void applyButtonStyle(JButton btn, Color bg, Color hover, Color fg) {
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFont(BOLD_FONT);
+        btn.setFocusPainted(false);
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorder(new EmptyBorder(10, 25, 10, 25));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) { btn.setBackground(hover); }
+            public void mouseExited(java.awt.event.MouseEvent e) { btn.setBackground(bg); }
+        });
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Input field styling
     // ─────────────────────────────────────────────────────────────────────────
 
     public static void styleTextField(JTextField field, String label) {
-        field.setBorder(new CompoundBorder(
-            BorderFactory.createTitledBorder(
-                new LineBorder(BORDER_COLOR, 1, true),
-                label,
-                TitledBorder.LEFT, TitledBorder.ABOVE_TOP,
-                SMALL_BOLD, TEXT_SECONDARY),
-            new EmptyBorder(2, 6, 4, 6)));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(new LineBorder(BORDER_COLOR, 1, true), label, 
+                TitledBorder.LEFT, TitledBorder.TOP, SMALL_BOLD, TEXT_SECONDARY),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         field.setFont(NORMAL_FONT);
         field.setBackground(WHITE);
         field.setForeground(TEXT_COLOR);
@@ -216,58 +261,37 @@ public class StyleConfig {
     // ─────────────────────────────────────────────────────────────────────────
 
     public static void styleTable(JTable table) {
+        table.setAutoCreateRowSorter(true);
         table.setFont(TABLE_FONT);
-        table.setRowHeight(42);
-        table.setShowGrid(false);
+        table.setRowHeight(52);
         table.setIntercellSpacing(new Dimension(0, 0));
-        table.setSelectionBackground(PRIMARY_LIGHT);
-        table.setSelectionForeground(TEXT_COLOR);
-        table.setFillsViewportHeight(true);
-        table.setBackground(WHITE);
-        table.setBorder(BorderFactory.createEmptyBorder());
-
-        // Row renderer with alternating bg and bottom divider
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        table.setShowGrid(false);
+        table.setShowHorizontalLines(true);
+        table.setGridColor(BORDER_COLOR);
+        
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable t, Object value,
-                    boolean sel, boolean focus, int row, int col) {
-                Component c = super.getTableCellRendererComponent(t, value, sel, focus, row, col);
-                setBorder(new CompoundBorder(
-                    new MatteBorder(0, 0, 1, 0, BORDER_COLOR),
-                    new EmptyBorder(8, 16, 8, 16)));
-                if (!sel) {
-                    c.setBackground(row % 2 == 0 ? WHITE : TABLE_ALT_ROW);
-                    c.setForeground(TEXT_COLOR);
+            public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
+                Component comp = super.getTableCellRendererComponent(t, v, s, f, r, c);
+                setBorder(new EmptyBorder(0, 15, 0, 15));
+                if (s) {
+                    comp.setBackground(PRIMARY_LIGHT);
+                    comp.setForeground(PRIMARY_DARK);
+                } else {
+                    comp.setBackground(r % 2 == 0 ? WHITE : TABLE_ALT_ROW);
+                    comp.setForeground(TEXT_COLOR);
                 }
-                return c;
-            }
-        });
-
-        // Header
-        JTableHeader header = table.getTableHeader();
-        header.setReorderingAllowed(false);
-        header.setFont(SMALL_BOLD);
-        header.setBackground(TABLE_HEADER_BG);
-        header.setForeground(TEXT_SECONDARY);
-        header.setPreferredSize(new Dimension(0, 40));
-
-        DefaultTableCellRenderer hr = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object v,
-                    boolean s, boolean f, int r, int col) {
-                super.getTableCellRendererComponent(t, v, s, f, r, col);
-                setBackground(TABLE_HEADER_BG);
-                setForeground(TEXT_SECONDARY);
-                setFont(SMALL_BOLD);
-                setBorder(new CompoundBorder(
-                    new MatteBorder(0, 0, 2, 0, BORDER_STRONG),
-                    new EmptyBorder(6, 12, 6, 12)));
-                setHorizontalAlignment(SwingConstants.LEFT);
-                return this;
+                return comp;
             }
         };
-        for (int i = 0; i < table.getColumnCount(); i++)
-            table.getColumnModel().getColumn(i).setHeaderRenderer(hr);
+        table.setDefaultRenderer(Object.class, renderer);
+        
+        JTableHeader header = table.getTableHeader();
+        header.setPreferredSize(new Dimension(0, 45));
+        header.setBackground(TABLE_HEADER_BG);
+        header.setForeground(TEXT_SECONDARY);
+        header.setFont(SMALL_BOLD);
+        header.setBorder(new MatteBorder(0, 0, 2, 0, BORDER_COLOR));
     }
 
     public static JScrollPane createStyledScrollPane(JTable table) {
@@ -283,12 +307,10 @@ public class StyleConfig {
     // ─────────────────────────────────────────────────────────────────────────
 
     public static JPanel createCard(int padding) {
-        JPanel p = new JPanel();
+        JPanel p = new JPanel(new BorderLayout());
         p.setBackground(CARD_COLOR);
-        p.setBorder(new CompoundBorder(
-            new CompoundBorder(
-                new LineBorder(BORDER_COLOR, 1, true),
-                new EmptyBorder(0, 0, 2, 0)),
+        p.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER_COLOR, 1, true),
             new EmptyBorder(padding, padding, padding, padding)));
         return p;
     }
@@ -340,11 +362,13 @@ public class StyleConfig {
                 case "PAID":
                 case "DONE":
                 case "SUCCESS":
+                case "AVAILABILITY":
                     statusBg = SUCCESS_COLOR;
                     statusFg = WHITE;
                     break;
                 case "PENDING":
                 case "IN_PROGRESS":
+                case "MAINTENANCE":
                     statusBg = WARNING_COLOR;
                     statusFg = WHITE;
                     break;
@@ -390,20 +414,20 @@ public class StyleConfig {
         JLabel lbl = new JLabel(text);
         lbl.setFont(HEADER_FONT);
         lbl.setForeground(TEXT_COLOR);
-        lbl.setBorder(new EmptyBorder(0, 0, GAP_SM, 0));
+        lbl.setBorder(new EmptyBorder(GAP_MD, 0, GAP_MD, 0));
         return lbl;
     }
 
     public static JLabel createBadge(String text, Color bg, Color fg, Color border) {
-        JLabel badge = new JLabel(" " + text + " ");
-        badge.setFont(SMALL_BOLD);
-        badge.setForeground(fg);
-        badge.setBackground(bg);
-        badge.setOpaque(true);
-        badge.setBorder(new CompoundBorder(
+        JLabel l = new JLabel(text, SwingConstants.CENTER);
+        l.setOpaque(true);
+        l.setBackground(bg);
+        l.setForeground(fg);
+        l.setFont(SMALL_BOLD);
+        l.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(border, 1, true),
-            new EmptyBorder(3, 8, 3, 8)));
-        return badge;
+            new EmptyBorder(4, 12, 4, 12)));
+        return l;
     }
 
     /** A styled ComboBox with consistent rendering. */

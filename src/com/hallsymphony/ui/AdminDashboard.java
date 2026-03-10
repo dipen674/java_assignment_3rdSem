@@ -3,13 +3,16 @@ package com.hallsymphony.ui;
 import com.hallsymphony.model.*;
 import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.util.ValidationUtil;
 import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
 import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
 import com.hallsymphony.ui.components.HallButton;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 import java.awt.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class AdminDashboard extends BaseDashboard {
     private Administrator admin;
@@ -22,9 +25,9 @@ public class AdminDashboard extends BaseDashboard {
 
     @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "  Staff Management", "STAFF");
-        addSidebarButton(sidebar, "  User Management", "USERS");
-        addSidebarButton(sidebar, "  All Bookings", "BOOKINGS");
+        addSidebarButton(sidebar, "Staff Management", "STAFF");
+        addSidebarButton(sidebar, "User Management", "USERS");
+        addSidebarButton(sidebar, "All Bookings", "BOOKINGS");
     }
 
     private void initContent() {
@@ -47,9 +50,14 @@ public class AdminDashboard extends BaseDashboard {
         JTextField searchField = new JTextField(18);
         HallButton searchBtn = HallButton.secondary("Search");
         
-        filterPanel.add(new JLabel("Search Staff: "));
+        filterPanel.add(new JLabel("Search: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
+        
+        filterPanel.add(Box.createHorizontalStrut(20));
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"ID", "Username", "Name"});
+        filterPanel.add(sortBox);
 
         JPanel headerArea = new JPanel(new BorderLayout());
         headerArea.setBackground(StyleConfig.BACKGROUND_COLOR);
@@ -64,8 +72,15 @@ public class AdminDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshStaffTable(model, "");
         searchBtn.addActionListener(e -> refreshStaffTable(model, searchField.getText()));
-        panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
+        searchField.addActionListener(e -> searchBtn.doClick());
 
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 0 : (sortBox.getSelectedIndex() == 1 ? 1 : 3);
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, SortOrder.ASCENDING)));
+        });
+
+        panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
+        
         JPanel btnPanel = StyleConfig.createActionBar();
         btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
         HallButton addBtn = HallButton.success("Add Scheduler");
@@ -128,15 +143,39 @@ public class AdminDashboard extends BaseDashboard {
 
         String title = staff == null ? "Add New Scheduler" : "Edit Staff Details";
         if (JOptionPane.showConfirmDialog(this, formPanel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
+            String user = uField.getText().trim();
+            String pass = pField.getText();
+            String name = nField.getText().trim();
+            String contact = cField.getText().trim();
+
+            if (user.isEmpty() || pass.isEmpty() || name.isEmpty() || contact.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "All fields are required.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            StringBuilder errors = new StringBuilder();
+            if (!ValidationUtil.isValidUsername(user)) errors.append("\u2022 Username must be 4-20 chars (letters/numbers/_).\n");
+            if (!ValidationUtil.isValidPassword(pass)) errors.append("\u2022 Password must be >= 6 chars.\n");
+            if (!ValidationUtil.isValidName(name)) errors.append("\u2022 Name should only contain letters.\n");
+            if (!ValidationUtil.isValidContact(contact)) errors.append("\u2022 Contact must be 10-12 digits.\n");
+
+            if (errors.length() > 0) {
+                JOptionPane.showMessageDialog(this, "Please fix errors:\n" + errors.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             if (staff == null) {
-                if (AuthService.addStaff(uField.getText().trim(), pField.getText(), nField.getText().trim(), cField.getText().trim(), "Scheduler")) {
+                if (AuthService.addStaff(user, pass, name, contact, "Scheduler")) {
                     JOptionPane.showMessageDialog(this, "Scheduler added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(this, "Username already exists.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                AuthService.updateProfile(staff.getId(), nField.getText().trim(), cField.getText().trim());
-                JOptionPane.showMessageDialog(this, "Staff updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                if (AuthService.updateProfile(staff.getId(), user, pass, name, contact)) {
+                    JOptionPane.showMessageDialog(this, "Staff updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Update failed. Username may already be in use.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
             refreshStaffTable(model, "");
         }
@@ -164,9 +203,14 @@ public class AdminDashboard extends BaseDashboard {
         JTextField searchField = new JTextField(18);
         HallButton searchBtn = HallButton.secondary("Search");
         
-        filterPanel.add(new JLabel("Search Users: "));
+        filterPanel.add(new JLabel("Search: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
+        
+        filterPanel.add(Box.createHorizontalStrut(20));
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"ID", "Username", "Role", "Name"});
+        filterPanel.add(sortBox);
 
         JPanel headerArea = new JPanel(new BorderLayout());
         headerArea.setBackground(StyleConfig.BACKGROUND_COLOR);
@@ -181,6 +225,14 @@ public class AdminDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshUserTable(model, "");
         searchBtn.addActionListener(e -> refreshUserTable(model, searchField.getText()));
+        searchField.addActionListener(e -> searchBtn.doClick());
+        
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex();
+            if (col == 3) col = 3; // Name is index 3
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, SortOrder.ASCENDING)));
+        });
+
         // Render the "Status" column (Active) as a green badge
         table.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
 
@@ -238,9 +290,14 @@ public class AdminDashboard extends BaseDashboard {
         timeFilter.setPreferredSize(new Dimension(110, 32));
         filterPanel.add(timeFilter);
 
-        HallButton filterBtn = HallButton.secondary("Apply Filters");
+        HallButton filterBtn = HallButton.secondary("Apply");
         
         filterPanel.add(filterBtn);
+
+        filterPanel.add(Box.createHorizontalStrut(20));
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"Date", "Price", "ID"});
+        filterPanel.add(sortBox);
 
         JPanel headerArea = new JPanel(new BorderLayout());
         headerArea.setBackground(StyleConfig.BACKGROUND_COLOR);
@@ -255,6 +312,12 @@ public class AdminDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshBookingTable(model, "All", "All");
         filterBtn.addActionListener(e -> refreshBookingTable(model, (String) statusFilter.getSelectedItem(), (String) timeFilter.getSelectedItem()));
+        
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 3 : (sortBox.getSelectedIndex() == 1 ? 6 : 0);
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, col == 6 ? SortOrder.DESCENDING : SortOrder.ASCENDING)));
+        });
+
         table.getColumnModel().getColumn(5).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);

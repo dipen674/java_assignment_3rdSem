@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 public class ReportService {
     public static double getSalesForPeriod(LocalDateTime start, LocalDateTime end) {
         return BookingService.getAllBookings().stream()
-                .filter(b -> b.getStatus().equals("PAID"))
-                .filter(b -> b.getStartTime().isAfter(start) && b.getStartTime().isBefore(end))
+                .filter(b -> "PAID".equalsIgnoreCase(b.getStatus()))
+                .filter(b -> !b.getStartTime().isBefore(start) && !b.getStartTime().isAfter(end))
                 .mapToDouble(Booking::getTotalPrice)
                 .sum();
     }
@@ -28,5 +28,16 @@ public class ReportService {
     public static Map<String, Double> getYearlySales() {
         LocalDateTime now = LocalDateTime.now();
         return Map.of("Current Year", getSalesForPeriod(now.minusYears(1), now));
+    }
+
+    public static double getTotalRevenue() {
+        return BookingService.getAllBookings().stream()
+                .filter(b -> "PAID".equalsIgnoreCase(b.getStatus()))
+                .mapToDouble(Booking::getTotalPrice)
+                .sum();
+    }
+
+    public static int getTotalBookingCount() {
+        return BookingService.getAllBookings().size();
     }
 }

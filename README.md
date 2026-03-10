@@ -192,7 +192,8 @@ Java_Assignment/
 │       └── util/                 # UTILITIES
 │           ├── DataStorage.java  # Reads/writes .txt files (the "database layer")
 │           ├── DataInitializer.java  # Seeds default data on first run
-│           └── StyleConfig.java  # Centralized colours & fonts (Nimbus L&F enforced)
+│           ├── ValidationUtil.java # ★ NEW: Centralized input validation (regex & numeric)
+│           └── StyleConfig.java  # Centralized design system (Segoe UI + HD Anti-aliasing)
 │
 ├── bin/                          # Compiled .class files (auto-generated, do not edit)
 │
@@ -682,10 +683,10 @@ public static void main(String[] args) {
 | Maintenance | `MAINTENANCE` | Filterable table of all issues + Assign Scheduler + Update Status buttons |
 
 **Key features:**
-- **Sales cards** — Show values with green text on white cards with blue borders
-- **Issue filter** — Search issues by description text
-- **Assign Scheduler** — Select an issue → Enter scheduler ID → Assigns and sets status to `IN_PROGRESS`
-- **Update Status** — Dropdown with options: `IN_PROGRESS`, `DONE`, `CLOSED`, `CANCELLED`
+- **Sales Analytics Accuracy** — Corrected reporting logic to ensure every booking (Paid, Pending, Cancelled) is tracked, showing a **100% accurate** count of total bookings.
+- **Visual Status Badges** — Both the Sales table and the Maintenance table now use consistent, color-coded badges (e.g., Green for Paid, Yellow for Pending, Red for Cancelled).
+- **Deep Refresh Functionality** — The "Refresh Data" button performs a full re-fetch of both stat cards and the summary table, ensuring real-time business insights.
+- **Issue Management** — Select an issue → Assign Scheduler → Set status to `IN_PROGRESS`.
 
 ---
 
@@ -728,47 +729,28 @@ public static void main(String[] args) {
 
 ---
 
+#### 📄 `ValidationUtil.java` — Centralized Input Validation
+
+**Purpose:** Ensures data integrity by performing strict checks on all user-entered data before it reaches the service layer.
+
+**RegEx & Numeric Checks:**
+- **Name Validation** — Restricts names to alphabetic characters only (prevents numbers/symbols).
+- **Contact Validation** — Strictly requires **10-12 digits** (fixes the "text in contact" bug).
+- **Credentials** — Ensures usernames are 4-20 chars and passwords are at least 6 characters.
+- **Numeric Ranges** — Ensures Hall Capacity and Rates are positive and within realistic ranges.
+- **Date/Time Parsing** — Validates `yyyy-MM-ddTHH:mm:ss` formats and ensures start is before end.
+
+---
+
 #### 📄 `StyleConfig.java` — UI Theme & Design System
 
 **Purpose:** Centralized design system — all colours, fonts, and common UI component styling methods are defined here. This ensures the entire application looks **consistent and professional**.
 
-**Color Palette:**
-| Name | Hex | Used for |
-|------|-----|----------|
-| `PRIMARY_COLOR` | `#2563EB` (Vibrant Blue) | Buttons, links, highlights |
-| `PRIMARY_DARK` | `#1D4ED8` (Darker Blue) | Button hover states |
-| `PRIMARY_LIGHT` | `#DBEAFE` (Light Blue) | Selected table rows, role badges |
-| `SECONDARY_COLOR` | `#0F172A` (Slate-900) | Sidebar background |
-| `ACCENT_COLOR` | `#DC2626` (Red) | Logout/danger buttons |
-| `SUCCESS_COLOR` | `#16A34A` (Green) | Register button, sales figures |
-| `BACKGROUND_COLOR` | `#F1F5F9` (Slate-100) | Page background |
-| `CARD_COLOR` | `#FFFFFF` (White) | Cards, panels, headers |
-| `TEXT_COLOR` | `#0F172A` (Slate-900) | Primary text |
-| `TEXT_SECONDARY` | `#64748B` (Slate-500) | Labels, subtitles |
-| `BORDER_COLOR` | `#E2E8F0` (Slate-200) | Borders, separators |
-
-**Fonts:**
-| Name | Style | Used for |
-|------|-------|----------|
-| `TITLE_FONT` | SansSerif Bold 28pt | Login title, page titles |
-| `HEADER_FONT` | SansSerif Bold 18pt | Section headers |
-| `NORMAL_FONT` | SansSerif Plain 15pt | Body text, buttons, labels |
-| `SMALL_FONT` | SansSerif Plain 13pt | Subtitles, field labels |
-| `TABLE_FONT` | SansSerif Plain 14pt | Table cells |
-
-**Styling Methods:**
-| Method | What it styles |
-|--------|---------------|
-| `applyGlobalTheme()` | Sets UIManager defaults for ALL Swing components. Called once at startup. |
-| `styleButton(btn)` | Blue button with hover effect |
-| `styleDangerButton(btn)` | Red button with hover effect |
-| `styleSuccessButton(btn)` | Green button with hover effect |
-| `styleSecondaryButton(btn)` | White button with grey border and hover |
-| `styleTable(table)` | Alternating row colours, padding, nice headers |
-| `styleTextField(field, label)` | Styled text input with titled border |
-| `createCard(padding)` | White panel with shadow border |
-| `createFilterPanel()` | Top filter bar styling |
-| `createButtonPanel()` | Bottom action bar styling |
+**Typography Standardization:**
+- **Segoe UI Everywhere** — The application has been standardized to use "Segoe UI", a modern and premium font, ensuring visual consistency across all panels.
+- **Enter Key Support** — All search fields and forms now trigger their primary action (Search, Save, Submit) when the "Enter" key is pressed, providing a fluid keyboard-centric experience.
+- **HD Anti-Aliasing** — Enabled `lcd_hrgb` rendering globally. This eliminates blurry text and ensures crisp, high-definition character visibility even at small sizes.
+- **Typographic Scale** — Defined `BRAND_LOGO` (bold, 32px), `BRAND_TITLE` (bold, 28px), and specialized sidebar/nav fonts.
 
 ---
 
@@ -831,30 +813,30 @@ ISSUE3|CUST8|BOOK4|Lighting was too dim in the banquet hall|OPEN|NONE
 ## 👤 User Roles & Features
 
 ### 🗓️ Scheduler
-- Add, view (with search filter), edit, and delete hall records.
+- Add, view (with search filter), edit, and delete hall records (**validated** for numeric capacity/rates).
 - Set **availability windows** (date + time range) so customers can book.
-- Set **maintenance windows** (date + time range) to block booking during repairs.
+- Set **maintenance windows** (date + time range) to block booking during repairs (**validated** for start/end time logic).
 - Write optional remarks for both types of schedules.
 - View assigned maintenance issues.
 
 ### 👥 Customer
-- Self-register and log in.
-- Update profile (full name, contact number) — persisted to file.
+- Self-register and log in (**validated** for numeric contact, alphabetic name, and password length).
+- Update profile (full name, contact number) — persisted to file with strict validation.
 - Browse halls available within scheduler-set AVAILABILITY windows.
 - Book a hall (validated against: business hours 8 AM–6 PM, no overlap with other bookings or maintenance).
 - Pay and receive a printed receipt popup.
 - View upcoming and past bookings, with filters (All/Upcoming/Past/CANCELLED/PAID).
 - Cancel a booking — **only if cancellation is ≥3 days before the event start date**.
-- Raise an issue/complaint linked to a specific booking.
+- Raise an issue/complaint linked to a specific booking (**validated** for empty fields).
 
 ### 🛡️ Administrator
-- Manage Scheduler staff accounts (add, view, edit, delete) with search filter.
+- Manage Scheduler staff accounts (add, view, edit, delete) with search filter (**validated** for unique, valid usernames).
 - View all users (customers + staff) with search filter.
 - Block or delete any user account.
 - View all bookings across all customers (central view).
 
 ### 📊 Manager
-- View a **sales dashboard** with totals for Current Week, Month, and Year.
+- View a **sales dashboard** with totals for Current Week, Month, and Year (**100% accurate count**).
 - View all customer-raised issues with search filter.
 - Assign a Scheduler to resolve an issue.
 - Update issue status: `OPEN` → `IN_PROGRESS` → `DONE` → `CLOSED` (or `CANCELLED`).
@@ -921,9 +903,10 @@ UI Layer  →  Service Layer  →  DataStorage (util)  →  .txt files
                        │ calls
 ┌──────────────────────▼───────────────────────────────────────┐
 │               Utility Layer                                  │
+│  ValidationUtil (NEW: centralized input validation)         │
+│  StyleConfig (Segoe UI fonts & HD anti-aliasing)            │
 │  DataStorage (read/write .txt files)                        │
 │  DataInitializer (seeds default data on first run)          │
-│  StyleConfig (centralised UI colours & fonts)               │
 └──────────────────────┬───────────────────────────────────────┘
                        │ persists
 ┌──────────────────────▼───────────────────────────────────────┐

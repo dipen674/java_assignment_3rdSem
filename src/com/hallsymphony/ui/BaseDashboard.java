@@ -51,243 +51,220 @@ public abstract class BaseDashboard extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // Subtle top-to-bottom gradient on sidebar
-                GradientPaint gp = new GradientPaint(
-                    0, 0,         new Color(11, 17, 38),
-                    0, getHeight(), new Color(15, 23, 42));
-                g2.setPaint(gp);
+                g2.setColor(StyleConfig.SIDEBAR_BG);
                 g2.fillRect(0, 0, getWidth(), getHeight());
                 g2.dispose();
             }
         };
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setPreferredSize(new Dimension(260, 0));
+        sidebar.setPreferredSize(new Dimension(280, 0));
         sidebar.setOpaque(false);
 
-        // Logo area
-        sidebar.add(buildLogoArea());
-        sidebar.add(makeSep());
-        sidebar.add(Box.createVerticalStrut(8));
+        // 1. Logo area
+        JPanel logoArea = buildLogoArea();
+        logoArea.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sidebar.add(logoArea);
+        sidebar.add(Box.createVerticalStrut(10));
 
-        // Nav label
-        JLabel navCap = new JLabel("  NAVIGATION");
-        navCap.setFont(new Font("Dialog", Font.BOLD, 10));
-        navCap.setForeground(new Color(71, 85, 105));  // Slate-600
+        // 2. Nav label
+        JLabel navCap = new JLabel("MAIN MENU");
+        navCap.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        navCap.setForeground(new Color(148, 163, 184)); // Slate-400
         navCap.setAlignmentX(Component.LEFT_ALIGNMENT);
-        navCap.setBorder(new EmptyBorder(4, 18, 8, 0));
+        navCap.setBorder(new EmptyBorder(25, 24, 5, 0)); // Less left margin (24), more top margin (25)
         sidebar.add(navCap);
+        sidebar.add(Box.createVerticalStrut(10)); // Extra gap after header
 
-        // Role-specific nav buttons (subclass fills these in)
+        // 3. Role-specific nav buttons
         addSidebarButtons(sidebar);
 
-        // Spacer
         sidebar.add(Box.createVerticalGlue());
-        sidebar.add(makeSep());
-        sidebar.add(buildUserCard());
+        
+        // 4. User Profile Section
+        JPanel profileCard = new JPanel(new BorderLayout(15, 0));
+        profileCard.setOpaque(false);
+        profileCard.setMaximumSize(new Dimension(280, 80));
+        profileCard.setBorder(new EmptyBorder(10, 20, 10, 20));
+        profileCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        String initial = user.getFullName().substring(0, 1).toUpperCase();
+        JLabel avatar = new JLabel(initial, SwingConstants.CENTER);
+        avatar.setPreferredSize(new Dimension(44, 44));
+        avatar.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        avatar.setForeground(Color.WHITE);
+        avatar.setOpaque(true);
+        avatar.setBackground(StyleConfig.PRIMARY_COLOR);
+        
+        JPanel userInfo = new JPanel(new GridLayout(2, 1, 0, 2));
+        userInfo.setOpaque(false);
+        JLabel nameLbl = new JLabel(user.getFullName());
+        nameLbl.setFont(StyleConfig.BOLD_FONT);
+        nameLbl.setForeground(Color.WHITE);
+        JLabel roleLbl = new JLabel(user.getRole().toUpperCase());
+        roleLbl.setFont(StyleConfig.SMALL_FONT);
+        roleLbl.setForeground(StyleConfig.SIDEBAR_TEXT);
+        userInfo.add(nameLbl);
+        userInfo.add(roleLbl);
+        
+        profileCard.add(avatar, BorderLayout.WEST);
+        profileCard.add(userInfo, BorderLayout.CENTER);
+        sidebar.add(profileCard);
+        sidebar.add(Box.createVerticalStrut(5));
 
-        // Logout button using HallButton
-        HallButton logoutBtn = HallButton.danger("  ← Sign Out");
-        logoutBtn.setFont(new Font("Dialog", Font.BOLD, 13));
-        logoutBtn.setMaximumSize(new Dimension(220, 38));
-        logoutBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        logoutBtn.addActionListener(e -> frame.logout());
-        sidebar.add(logoutBtn);
-        sidebar.add(Box.createVerticalStrut(16));
+        // 5. Sign Out Button - Using HallButton for perfect visibility
+        JPanel logoutWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 0));
+        logoutWrapper.setOpaque(false);
+        logoutWrapper.setMaximumSize(new Dimension(280, 60));
+        logoutWrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        HallButton logoutBtn = HallButton.danger("Sign Out");
+        logoutBtn.setPreferredSize(new Dimension(220, 42));
+        logoutBtn.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to sign out?", "Confirm logout", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                frame.logout();
+            }
+        });
+        
+        logoutWrapper.add(logoutBtn);
+        sidebar.add(logoutWrapper);
+        sidebar.add(Box.createVerticalStrut(20));
 
         return sidebar;
     }
 
     private JPanel buildLogoArea() {
-        JPanel area = new JPanel() {
-            @Override protected void paintComponent(Graphics g) {
-                // Transparent — parent sidebar paints background
-            }
-        };
-        area.setLayout(new BoxLayout(area, BoxLayout.Y_AXIS));
+        JPanel area = new JPanel();
+        area.setLayout(new BoxLayout(area, BoxLayout.X_AXIS));
         area.setOpaque(false);
-        area.setBorder(new EmptyBorder(24, 20, 20, 20));
-        area.setMaximumSize(new Dimension(260, 120));
+        area.setBorder(new EmptyBorder(30, 24, 20, 24));
+        area.setMaximumSize(new Dimension(280, 100));
 
-        JLabel icon = new JLabel("H S");
-        icon.setFont(new Font("Dialog", Font.BOLD, 32));
-        icon.setForeground(StyleConfig.PRIMARY_LIGHT);
-        icon.setAlignmentX(Component.CENTER_ALIGNMENT);
-        area.add(icon);
-        area.add(Box.createVerticalStrut(8));
+        JLabel logoIcon = new JLabel("H"); // Simple letter instead of symbol
+        logoIcon.setFont(new Font("Segoe UI", Font.PLAIN, 32));
+        logoIcon.setForeground(StyleConfig.PRIMARY_COLOR);
+        area.add(logoIcon);
+        area.add(Box.createHorizontalStrut(15));
+
+        JPanel textPart = new JPanel();
+        textPart.setLayout(new BoxLayout(textPart, BoxLayout.Y_AXIS));
+        textPart.setOpaque(false);
 
         JLabel name = new JLabel("Hall Symphony");
         name.setForeground(Color.WHITE);
-        name.setFont(new Font("Dialog", Font.BOLD, 16));
-        name.setAlignmentX(Component.CENTER_ALIGNMENT);
-        area.add(name);
+        name.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        textPart.add(name);
 
-        JLabel tagline = new JLabel("Booking Management System");
-        tagline.setForeground(new Color(71, 85, 105));
-        tagline.setFont(new Font("Dialog", Font.PLAIN, 10));
-        tagline.setAlignmentX(Component.CENTER_ALIGNMENT);
-        area.add(tagline);
+        JLabel tag = new JLabel("Premium Booking");
+        tag.setForeground(StyleConfig.TEXT_MUTED);
+        tag.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        textPart.add(tag);
 
+        area.add(textPart);
         return area;
-    }
-
-    private JPanel buildUserCard() {
-        JPanel card = new JPanel() {
-            @Override protected void paintComponent(Graphics g) {}
-        };
-        card.setLayout(new BorderLayout(10, 0));
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(12, 16, 12, 16));
-        card.setMaximumSize(new Dimension(260, 60));
-
-        // Avatar circle
-        JLabel avatar = new JLabel() {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(StyleConfig.PRIMARY_COLOR);
-                g2.fillOval(0, 0, getWidth(), getHeight());
-                g2.setColor(Color.WHITE);
-                g2.setFont(new Font("Dialog", Font.BOLD, 13));
-                FontMetrics fm = g2.getFontMetrics();
-                String letter = user.getFullName().substring(0, 1).toUpperCase();
-                g2.drawString(letter, (getWidth() - fm.stringWidth(letter)) / 2,
-                    (getHeight() - fm.getHeight()) / 2 + fm.getAscent());
-                g2.dispose();
-            }
-        };
-        avatar.setPreferredSize(new Dimension(36, 36));
-        avatar.setMinimumSize(new Dimension(36, 36));
-        card.add(avatar, BorderLayout.WEST);
-
-        JPanel info = new JPanel();
-        info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
-        info.setOpaque(false);
-
-        JLabel nameLabel = new JLabel(user.getFullName());
-        nameLabel.setForeground(Color.WHITE);
-        nameLabel.setFont(new Font("Dialog", Font.BOLD, 12));
-        info.add(nameLabel);
-
-        JLabel roleLabel = new JLabel(user.getRole());
-        roleLabel.setForeground(new Color(100, 116, 139));
-        roleLabel.setFont(new Font("Dialog", Font.PLAIN, 11));
-        info.add(roleLabel);
-
-        card.add(info, BorderLayout.CENTER);
-        return card;
-    }
-
-    private JSeparator makeSep() {
-        JSeparator sep = new JSeparator();
-        sep.setForeground(new Color(30, 41, 59));
-        sep.setBackground(new Color(30, 41, 59));
-        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        return sep;
     }
 
     // ── Top bar ───────────────────────────────────────────────────────────────
     private JPanel buildTopBar() {
         JPanel bar = new JPanel(new BorderLayout());
         bar.setBackground(Color.WHITE);
-        bar.setBorder(new CompoundBorder(
-            new MatteBorder(0, 0, 1, 0, StyleConfig.BORDER_COLOR),
-            new EmptyBorder(14, 24, 14, 24)));
+        bar.setPreferredSize(new Dimension(0, 75));
+        bar.setBorder(new MatteBorder(0, 0, 1, 0, StyleConfig.BORDER_COLOR));
 
-        // Left: breadcrumb style welcome
-        JPanel left = new JPanel();
-        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 24, 18));
         left.setOpaque(false);
 
-        JLabel subGreet = new JLabel("HALL SYMPHONY");
-        subGreet.setFont(new Font("Dialog", Font.BOLD, 9));
-        subGreet.setForeground(StyleConfig.TEXT_MUTED);
-        left.add(subGreet);
-
-        JLabel welcome = new JLabel("Welcome back, " + user.getFullName());
-        welcome.setFont(new Font("Dialog", Font.BOLD, 17));
-        welcome.setForeground(StyleConfig.TEXT_COLOR);
-        left.add(welcome);
-
+        JLabel title = new JLabel("Dashboard Overview");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        title.setForeground(StyleConfig.TEXT_COLOR);
+        left.add(title);
         bar.add(left, BorderLayout.WEST);
 
-        // Right: role badge
-        JLabel badge = StyleConfig.createBadge(
-            user.getRole().toUpperCase(),
-            StyleConfig.PRIMARY_LIGHT,
-            StyleConfig.PRIMARY_COLOR,
-            StyleConfig.PRIMARY_COLOR);
-        bar.add(badge, BorderLayout.EAST);
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 24, 15));
+        right.setOpaque(false);
 
+        // Real-time clock
+        JLabel clock = new JLabel();
+        clock.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        clock.setForeground(StyleConfig.TEXT_SECONDARY);
+        Timer timer = new Timer(1000, e -> {
+            clock.setText(java.time.format.DateTimeFormatter.ofPattern("hh:mm:ss a | MMM dd").format(java.time.LocalDateTime.now()));
+        });
+        timer.start();
+        right.add(clock);
+        
+        right.add(Box.createHorizontalStrut(10));
+        
+        // Role Badge
+        JLabel badge = StyleConfig.createBadge(user.getRole(), StyleConfig.PRIMARY_LIGHT, StyleConfig.PRIMARY_COLOR, StyleConfig.PRIMARY_COLOR);
+        right.add(badge);
+
+        bar.add(right, BorderLayout.EAST);
         return bar;
     }
 
-    // ── Sidebar nav button ────────────────────────────────────────────────────
     protected void addSidebarButton(JPanel sidebar, String text, String cardName) {
-        // Custom nav button that draws an active indicator bar on the left edge
         JButton btn = new JButton(text) {
-            boolean active = false;
             boolean hovered = false;
-
             {
-                setOpaque(false);
-                setContentAreaFilled(false);
-                setBorderPainted(false);
-                setFocusPainted(false);
-                setFont(new Font("Dialog", Font.PLAIN, 13));
-                setForeground(StyleConfig.SIDEBAR_TEXT);
-                setHorizontalAlignment(SwingConstants.LEFT);
-                setCursor(new Cursor(Cursor.HAND_CURSOR));
-                setBorder(new EmptyBorder(11, 20, 11, 20));
-                setMaximumSize(new Dimension(260, 46));
-                setAlignmentX(Component.LEFT_ALIGNMENT);
-
                 addMouseListener(new MouseAdapter() {
                     public void mouseEntered(MouseEvent e) { hovered = true; repaint(); }
                     public void mouseExited(MouseEvent e)  { hovered = false; repaint(); }
                 });
-
-                addActionListener(e -> {
-                    // Deactivate previous
-                    if (activeNavBtn != null) {
-                        activeNavBtn.setForeground(StyleConfig.SIDEBAR_TEXT);
-                        activeNavBtn.repaint();
-                    }
-                    active = true;
-                    activeNavBtn = this;
-                    setForeground(Color.WHITE);
-                    setFont(new Font("Dialog", Font.BOLD, 13));
-                    repaint();
-
-                    CardLayout cl = (CardLayout) contentArea.getLayout();
-                    cl.show(contentArea, cardName);
-                });
             }
-
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                boolean isActive = (activeNavBtn == this);
-                int w = getWidth(), h = getHeight();
-
-                if (isActive) {
-                    // Active: semi-transparent blue fill + bright left-edge accent bar
-                    g2.setColor(new Color(37, 99, 235, 40));
-                    g2.fillRoundRect(6, 2, w - 12, h - 4, 8, 8);
-                    g2.setColor(new Color(37, 99, 235));
-                    g2.fillRoundRect(0, 6, 4, h - 12, 4, 4);
+                
+                boolean active = (activeNavBtn == this);
+                if (active) {
+                    g2.setColor(new Color(255, 255, 255, 10));
+                    g2.fillRoundRect(12, 4, getWidth()-24, getHeight()-8, 10, 10);
+                    g2.setColor(StyleConfig.PRIMARY_COLOR);
+                    g2.fillRoundRect(0, 12, 5, getHeight()-24, 0, 0); // Active indicator
                 } else if (hovered) {
-                    // Hover: lighter fill
-                    g2.setColor(new Color(255, 255, 255, 12));
-                    g2.fillRoundRect(6, 2, w - 12, h - 4, 8, 8);
+                    g2.setColor(new Color(255, 255, 255, 5));
+                    g2.fillRoundRect(12, 4, getWidth()-24, getHeight()-8, 10, 10);
                 }
                 g2.dispose();
                 super.paintComponent(g);
             }
         };
 
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setForeground(StyleConfig.SIDEBAR_TEXT);
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btn.setOpaque(false);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setMaximumSize(new Dimension(280, 50));
+        btn.setBorder(new EmptyBorder(0, 44, 0, 20)); // Increased left margin (44) for hierarchy
+
+        btn.addActionListener(e -> {
+            if (activeNavBtn != null) {
+                activeNavBtn.setForeground(StyleConfig.SIDEBAR_TEXT);
+                activeNavBtn.setFont(StyleConfig.SIDEBAR_NAV);
+            }
+            activeNavBtn = btn;
+            btn.setForeground(Color.WHITE);
+            btn.setFont(StyleConfig.SIDEBAR_BOLD);
+            
+            CardLayout cl = (CardLayout) contentArea.getLayout();
+            cl.show(contentArea, cardName);
+            repaint();
+        });
+
         sidebar.add(btn);
         sidebar.add(Box.createVerticalStrut(2));
+        
+        // Auto-select first button
+        if (activeNavBtn == null) {
+            activeNavBtn = btn; // Tentatively assign to prevent subsequent buttons from auto-clicking
+            SwingUtilities.invokeLater(() -> btn.doClick());
+        }
     }
 }

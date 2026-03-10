@@ -3,19 +3,22 @@ package com.hallsymphony.ui;
 import com.hallsymphony.model.*;
 import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.util.ValidationUtil;
 import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
-import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
-import com.hallsymphony.ui.components.HallButton;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 import java.awt.*;
+import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class CustomerDashboard extends BaseDashboard {
     private Customer customer;
+    private DefaultTableModel hallModel;
+    private DefaultTableModel bookingModel;
+    private DefaultTableModel issueModel;
 
     public CustomerDashboard(MainFrame frame, Customer customer) {
         super(frame, customer);
@@ -25,10 +28,10 @@ public class CustomerDashboard extends BaseDashboard {
 
     @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "  Available Halls", "HALLS");
-        addSidebarButton(sidebar, "  My Bookings", "BOOKINGS");
-        addSidebarButton(sidebar, "  Report Issue", "ISSUES");
-        addSidebarButton(sidebar, "  Profile", "PROFILE");
+        addSidebarButton(sidebar, "Available Halls", "HALLS");
+        addSidebarButton(sidebar, "My Bookings", "BOOKINGS");
+        addSidebarButton(sidebar, "Report Issue", "ISSUES");
+        addSidebarButton(sidebar, "Profile", "PROFILE");
     }
 
     private void initContent() {
@@ -51,12 +54,13 @@ public class CustomerDashboard extends BaseDashboard {
         panel.add(topPanel, BorderLayout.NORTH);
 
         // Table
-        String[] columns = {"ID", "Name", "Type", "Capacity", "Rate/Hr (RM)"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+        String[] columns = {"ID", "Name", "Type", "Capacity", "Rate/Hr (RM)", "Availability"};
+        hallModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
-        JTable table = new JTable(model);
-        refreshHallTable(model);
+        JTable table = new JTable(hallModel);
+        refreshHallTable();
+        table.getColumnModel().getColumn(5).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
         // Button bar
@@ -67,8 +71,8 @@ public class CustomerDashboard extends BaseDashboard {
         bookBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {
-                String hallId = (String) model.getValueAt(row, 0);
-                showBookingDialog(hallId, model);
+                String hallId = (String) hallModel.getValueAt(row, 0);
+                showBookingDialog(hallId);
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a hall first.", "No Selection", JOptionPane.WARNING_MESSAGE);
             }
@@ -79,22 +83,24 @@ public class CustomerDashboard extends BaseDashboard {
         return panel;
     }
 
-    private void refreshHallTable(DefaultTableModel model) {
-        model.setRowCount(0);
+    private void refreshHallTable() {
+        hallModel.setRowCount(0);
         List<Schedule> schedules = HallService.getAllSchedules();
         for (Hall h : HallService.getAllHalls()) {
-            boolean isAvailable = schedules.stream()
+            boolean available = schedules.stream()
                 .anyMatch(s -> s.getHallId().equals(h.getId()) && s.getType().equals("AVAILABILITY"));
-            if (isAvailable) {
-                model.addRow(new Object[]{h.getId(), h.getName(), h.getType(), h.getCapacity(), String.format("%.2f", h.getRatePerHour())});
-            }
+            hallModel.addRow(new Object[]{h.getId(), h.getName(), h.getType(), h.getCapacity(), 
+                String.format("%.2f", h.getRatePerHour()), available ? "SUCCESS" : "CLOSED"});
         }
     }
 
-    private void showBookingDialog(String hallId, DefaultTableModel hallModel) {
-        JTextField startField = new JTextField("2024-07-20T10:00:00");
-        JTextField endField = new JTextField("2024-07-20T14:00:00");
-        JTextField remarksField = new JTextField("Event Booking");
+    private void showBookingDialog(String hallId) {
+        LocalDateTime defaultDate = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0);
+        DateTimeFormatter iso = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        
+        JTextField startField = new JTextField(defaultDate.format(iso));
+        JTextField endField = new JTextField(defaultDate.plusHours(4).format(iso));
+        JTextField remarksField = new JTextField("Corporate Event");
 
         StyleConfig.styleTextField(startField, "Start Time (yyyy-MM-ddTHH:mm:ss)");
         StyleConfig.styleTextField(endField, "End Time (yyyy-MM-ddTHH:mm:ss)");
@@ -108,6 +114,15 @@ public class CustomerDashboard extends BaseDashboard {
         dialogPanel.add(endField);
         dialogPanel.add(Box.createVerticalStrut(8));
         dialogPanel.add(remarksField);
+
+        // Enter key to trigger OK
+        remarksField.addActionListener(ae -> {
+            Window window = SwingUtilities.getWindowAncestor(dialogPanel);
+            if (window instanceof JDialog) {
+                JButton okButton = findOkButton((JDialog) window);
+                if (okButton != null) okButton.doClick();
+            }
+        });
 
         int option = JOptionPane.showConfirmDialog(this, dialogPanel, "Book Hall", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
@@ -132,13 +147,13 @@ public class CustomerDashboard extends BaseDashboard {
                 // ── Payment Confirmation Dialog ──
                 DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                 String confirmMsg = String.format(
-                    "═══ PAYMENT SUMMARY ═══\n\n" +
+                    "--- PAYMENT SUMMARY ---\n\n" +
                     "Hall:       %s (%s)\n" +
                     "Start:      %s\n" +
                     "End:        %s\n" +
                     "Duration:   %.0f hour(s)\n" +
                     "Rate:       RM %.2f/hr\n" +
-                    "─────────────────────\n" +
+                    "---------------------\n" +
                     "TOTAL:      RM %.2f\n\n" +
                     "Do you wish to proceed with the payment?",
                     hall.getName(), hall.getType(),
@@ -152,9 +167,10 @@ public class CustomerDashboard extends BaseDashboard {
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (BookingService.createBooking(customer.getId(), hallId, start, end, total, remarks)) {
                         showReceipt(hallId, start, end, total);
+                        refreshBookingTable(bookingModel, "All");
                     } else {
                         JOptionPane.showMessageDialog(this,
-                            "Booking failed. Possible reasons:\n• Hours outside 8 AM – 6 PM\n• Overlaps with an existing booking\n• Hall under maintenance\n• Outside availability window",
+                            "Booking failed. Possible reasons:\n\u2022 Hours outside 8 AM \u2013 6 PM\n\u2022 Overlaps with an existing booking\n\u2022 Hall under maintenance\n\u2022 Outside availability window",
                             "Booking Failed", JOptionPane.ERROR_MESSAGE);
                     }
                 }
@@ -176,13 +192,18 @@ public class CustomerDashboard extends BaseDashboard {
         topPanel.add(StyleConfig.createSectionTitle("My Bookings"), BorderLayout.WEST);
 
         JPanel filterPanel = StyleConfig.createFilterPanel();
-        JComboBox<String> statusFilter = new JComboBox<>(new String[]{"All", "Upcoming", "Past", "PAID", "CANCELLED"});
-        statusFilter.setPreferredSize(new Dimension(130, 32));
-        HallButton refreshBtn = HallButton.secondary("Apply Filter");
-
-        filterPanel.add(new JLabel("Filter: "));
+        filterPanel.add(new JLabel("Status: "));
+        JComboBox<String> statusFilter = new JComboBox<>(new String[]{"All", "PAID", "CANCELLED"});
+        statusFilter.setPreferredSize(new Dimension(110, 32));
         filterPanel.add(statusFilter);
-        filterPanel.add(refreshBtn);
+
+        HallButton filterBtn = HallButton.secondary("Apply");
+        filterPanel.add(filterBtn);
+
+        filterPanel.add(Box.createHorizontalStrut(20));
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"ID", "Start Time", "Price"});
+        filterPanel.add(sortBox);
 
         JPanel headerArea = new JPanel(new BorderLayout());
         headerArea.setBackground(StyleConfig.BACKGROUND_COLOR);
@@ -192,12 +213,17 @@ public class CustomerDashboard extends BaseDashboard {
 
         // Table
         String[] columns = {"Booking ID", "Hall", "Start", "End", "Status", "Price (RM)"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+        bookingModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
-        JTable table = new JTable(model);
-        refreshBookingTable(model, "All");
-        refreshBtn.addActionListener(e -> refreshBookingTable(model, (String) statusFilter.getSelectedItem()));
+        JTable table = new JTable(bookingModel);
+        refreshBookingTable(bookingModel, "All");
+        filterBtn.addActionListener(e -> refreshBookingTable(bookingModel, (String) statusFilter.getSelectedItem()));
+        
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 0 : (sortBox.getSelectedIndex() == 1 ? 2 : 5);
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, col == 5 ? SortOrder.DESCENDING : SortOrder.ASCENDING)));
+        });
 
         table.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         
@@ -211,15 +237,15 @@ public class CustomerDashboard extends BaseDashboard {
         cancelBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {
-                String id = (String) model.getValueAt(row, 0);
+                String id = (String) bookingModel.getValueAt(row, 0);
                 int confirm = JOptionPane.showConfirmDialog(this,
                     "Are you sure you want to cancel this booking?", "Confirm Cancellation", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (BookingService.cancelBooking(id)) {
                         JOptionPane.showMessageDialog(this, "Booking cancelled successfully.", "Cancelled", JOptionPane.INFORMATION_MESSAGE);
-                        refreshBookingTable(model, (String) statusFilter.getSelectedItem());
+                        refreshBookingTable(bookingModel, "All");
                     } else {
-                        JOptionPane.showMessageDialog(this, "Cannot cancel — must be at least 3 days before the booking date.", "Cannot Cancel", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Cannot cancel \u2014 must be at least 3 days before the booking date.", "Cannot Cancel", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -249,18 +275,29 @@ public class CustomerDashboard extends BaseDashboard {
         JPanel panel = new JPanel(new BorderLayout(0, 0));
         panel.setBackground(StyleConfig.BACKGROUND_COLOR);
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
-        topPanel.add(StyleConfig.createSectionTitle("My Issues"), BorderLayout.WEST);
-        panel.add(topPanel, BorderLayout.NORTH);
+        JPanel topArea = new JPanel(new BorderLayout());
+        topArea.setBackground(StyleConfig.BACKGROUND_COLOR);
+        topArea.add(StyleConfig.createSectionTitle("My Reported Issues"), BorderLayout.WEST);
+        
+        JPanel sortPanel = StyleConfig.createFilterPanel();
+        sortPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"Issue ID", "Status"});
+        sortPanel.add(sortBox);
+        topArea.add(sortPanel, BorderLayout.EAST);
+        
+        panel.add(topArea, BorderLayout.NORTH);
 
         String[] columns = {"Issue ID", "Booking ID", "Description", "Status"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+        issueModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
-        JTable table = new JTable(model);
-        refreshIssueTable(model);
+        JTable table = new JTable(issueModel);
+        refreshIssueTable();
+
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 0 : 3;
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, SortOrder.ASCENDING)));
+        });
 
         table.getColumnModel().getColumn(3).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
 
@@ -282,14 +319,33 @@ public class CustomerDashboard extends BaseDashboard {
             formPanel.add(Box.createVerticalStrut(8));
             formPanel.add(descField);
 
+            // Enter key to trigger OK
+            descField.addActionListener(ae -> {
+                Window window = SwingUtilities.getWindowAncestor(formPanel);
+                if (window instanceof JDialog) {
+                    JButton okButton = findOkButton((JDialog) window);
+                    if (okButton != null) okButton.doClick();
+                }
+            });
+
             if (JOptionPane.showConfirmDialog(this, formPanel, "Report Issue", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
                 String bId = bIdField.getText().trim();
                 String desc = descField.getText().trim();
-                if (!bId.isEmpty() && !desc.isEmpty()) {
-                    IssueService.raiseIssue(customer.getId(), bId, desc);
-                    refreshIssueTable(model);
-                    JOptionPane.showMessageDialog(this, "Issue reported successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                
+                if (bId.isEmpty() || desc.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Booking ID and Description cannot be empty.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
+                
+                // Extra check: Booking ID usually starts with BKG
+                if (!bId.startsWith("BKG")) {
+                    JOptionPane.showMessageDialog(this, "Invalid Booking ID format. Must start with 'BKG'.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                IssueService.raiseIssue(customer.getId(), bId, desc);
+                refreshIssueTable();
+                JOptionPane.showMessageDialog(this, "Issue reported successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         btnPanel.add(reportBtn);
@@ -298,10 +354,10 @@ public class CustomerDashboard extends BaseDashboard {
         return panel;
     }
 
-    private void refreshIssueTable(DefaultTableModel model) {
-        model.setRowCount(0);
+    private void refreshIssueTable() {
+        issueModel.setRowCount(0);
         for (Issue i : IssueService.getIssuesByCustomer(customer.getId())) {
-            model.addRow(new Object[]{i.getId(), i.getBookingId(), i.getDescription(), i.getStatus()});
+            issueModel.addRow(new Object[]{i.getId(), i.getBookingId(), i.getDescription(), i.getStatus()});
         }
     }
 
@@ -327,6 +383,11 @@ public class CustomerDashboard extends BaseDashboard {
 
         JTextField contactField = new JTextField(customer.getContact());
         StyleConfig.styleTextField(contactField, "Contact Number");
+        HallButton saveBtn = HallButton.primary("Save Changes");
+        
+        nameField.addActionListener(e -> contactField.requestFocusInWindow());
+        contactField.addActionListener(e -> saveBtn.doClick());
+        
         card.add(contactField);
         card.add(Box.createVerticalStrut(16));
 
@@ -337,17 +398,27 @@ public class CustomerDashboard extends BaseDashboard {
         card.add(usernameLabel);
         card.add(Box.createVerticalStrut(20));
 
-        HallButton saveBtn = HallButton.primary("Save Changes");
         
         saveBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         saveBtn.addActionListener(e -> {
             String newName = nameField.getText().trim();
             String newContact = contactField.getText().trim();
+            
             if (newName.isEmpty() || newContact.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Fields cannot be empty.", "Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            if (AuthService.updateProfile(customer.getId(), newName, newContact)) {
+
+            StringBuilder errors = new StringBuilder();
+            if (!ValidationUtil.isValidName(newName)) errors.append("\u2022 Name should only contain letters.\n");
+            if (!ValidationUtil.isValidContact(newContact)) errors.append("\u2022 Contact must be 10-12 digits.\n");
+
+            if (errors.length() > 0) {
+                JOptionPane.showMessageDialog(this, "Please fix errors:\n" + errors.toString(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (AuthService.updateProfile(customer.getId(), customer.getUsername(), customer.getPassword(), newName, newContact)) {
                 customer.setFullName(newName);
                 customer.setContact(newContact);
                 JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -376,7 +447,7 @@ public class CustomerDashboard extends BaseDashboard {
         header.setBackground(StyleConfig.PRIMARY_COLOR);
         header.setBorder(new EmptyBorder(20, 24, 20, 24));
 
-        JLabel headerIcon = new JLabel("\u2705  Booking Confirmed!");
+        JLabel headerIcon = new JLabel("Booking Confirmed!");
         headerIcon.setFont(new Font("SansSerif", Font.BOLD, 18));
         headerIcon.setForeground(StyleConfig.WHITE);
         headerIcon.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -464,5 +535,18 @@ public class CustomerDashboard extends BaseDashboard {
         row.add(v, BorderLayout.EAST);
 
         parent.add(row);
+    }
+
+    private JButton findOkButton(Container container) {
+        for (Component c : container.getComponents()) {
+            if (c instanceof JButton) {
+                JButton b = (JButton) c;
+                if ("OK".equals(b.getText()) || b.getText().contains("OK")) return b;
+            } else if (c instanceof Container) {
+                JButton b = findOkButton((Container) c);
+                if (b != null) return b;
+            }
+        }
+        return null;
     }
 }

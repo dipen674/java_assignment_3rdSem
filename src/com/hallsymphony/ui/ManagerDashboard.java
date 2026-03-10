@@ -5,10 +5,8 @@ import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
 import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
-import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
-import com.hallsymphony.ui.components.HallButton;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 import java.awt.*;
 import java.util.List;
 
@@ -21,9 +19,10 @@ public class ManagerDashboard extends BaseDashboard {
         initContent();
     }
 
+    @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "  Sales Dashboard", "SALES");
-        addSidebarButton(sidebar, "  Issue Management", "MAINTENANCE");
+        addSidebarButton(sidebar, "Sales Dashboard", "SALES");
+        addSidebarButton(sidebar, "Issue Management", "MAINTENANCE");
     }
 
     private void initContent() {
@@ -46,29 +45,29 @@ public class ManagerDashboard extends BaseDashboard {
         topPanel.add(refreshBtn, BorderLayout.EAST);
         panel.add(topPanel, BorderLayout.NORTH);
 
-        JPanel cardsPanel = new JPanel(new GridLayout(1, 3, 16, 0));
+        JPanel cardsPanel = new JPanel(new GridLayout(1, 4, 16, 0)); // 4 cards in one row
         cardsPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
 
-        double weeklySales = ReportService.getWeeklySales().values().iterator().next();
-        double monthlySales = ReportService.getMonthlySales().values().iterator().next();
-        double yearlySales = ReportService.getYearlySales().values().iterator().next();
+        double weeklySales = getSafeSales(ReportService.getWeeklySales());
+        double monthlySales = getSafeSales(ReportService.getMonthlySales());
+        double totalRev = ReportService.getTotalRevenue();
+        int totalBookings = ReportService.getTotalBookingCount();
 
-        JPanel weekCard = createStatCard("Weekly Sales", "RM " + String.format("%.2f", weeklySales), StyleConfig.PRIMARY_COLOR, "This Week");
-        JPanel monthCard = createStatCard("Monthly Sales", "RM " + String.format("%.2f", monthlySales), StyleConfig.SUCCESS_COLOR, "This Month");
-        JPanel yearCard = createStatCard("Yearly Sales", "RM " + String.format("%.2f", yearlySales), new Color(124, 58, 237), "This Year");
+        JPanel weekCard = createStatCard("Weekly", "RM " + String.format("%.2f", weeklySales), StyleConfig.PRIMARY_COLOR, "Past 7 Days");
+        JPanel monthCard = createStatCard("Monthly", "RM " + String.format("%.2f", monthlySales), StyleConfig.SUCCESS_COLOR, "Past 30 Days");
+        JPanel totalRevCard = createStatCard("Lifetime Revenue", "RM " + String.format("%.2f", totalRev), new Color(124, 58, 237), "All Time");
+        JPanel totalBookCard = createStatCard("Bookings", String.valueOf(totalBookings), new Color(245, 158, 11), "Active & Completed");
 
         cardsPanel.add(weekCard);
         cardsPanel.add(monthCard);
-        cardsPanel.add(yearCard);
+        cardsPanel.add(totalRevCard);
+        cardsPanel.add(totalBookCard);
 
         refreshBtn.addActionListener(e -> {
-            // Refresh by rebuilding cards
-            double w = ReportService.getWeeklySales().values().iterator().next();
-            double m = ReportService.getMonthlySales().values().iterator().next();
-            double y = ReportService.getYearlySales().values().iterator().next();
-            updateStatCard(weekCard, "RM " + String.format("%.2f", w));
-            updateStatCard(monthCard, "RM " + String.format("%.2f", m));
-            updateStatCard(yearCard, "RM " + String.format("%.2f", y));
+            updateStatCard(weekCard, "RM " + String.format("%.2f", getSafeSales(ReportService.getWeeklySales())));
+            updateStatCard(monthCard, "RM " + String.format("%.2f", getSafeSales(ReportService.getMonthlySales())));
+            updateStatCard(totalRevCard, "RM " + String.format("%.2f", ReportService.getTotalRevenue()));
+            updateStatCard(totalBookCard, String.valueOf(ReportService.getTotalBookingCount()));
         });
 
         // Wrap cards in a top-aligned container so they don't stretch vertically
@@ -87,22 +86,45 @@ public class ManagerDashboard extends BaseDashboard {
         tableTitle.setBorder(new EmptyBorder(0, 0, 8, 0));
         tableSection.add(tableTitle, BorderLayout.NORTH);
 
-        String[] columns = {"Booking ID", "Customer", "Hall", "Date", "Amount (RM)"};
+        String[] columns = {"Booking ID", "Customer", "Hall", "Date", "Amount (RM)", "Status"};
         DefaultTableModel tableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         JTable bookingTable = new JTable(tableModel);
-        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        BookingService.getAllBookings().stream()
-            .filter(b -> b.getStatus().equals("PAID"))
-            .forEach(b -> tableModel.addRow(new Object[]{b.getId(), b.getCustomerId(), b.getHallId(), b.getStartTime().format(fmt), String.format("%.2f", b.getTotalPrice())}));
-        bookingTable.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
+        
+        refreshBookingTable(tableModel);
+        
+        bookingTable.getColumnModel().getColumn(4).setPreferredWidth(100);
+        bookingTable.getColumnModel().getColumn(5).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         tableSection.add(StyleConfig.createStyledScrollPane(bookingTable), BorderLayout.CENTER);
+
+        refreshBtn.addActionListener(e -> {
+            updateStatCard(weekCard, "RM " + String.format("%.2f", getSafeSales(ReportService.getWeeklySales())));
+            updateStatCard(monthCard, "RM " + String.format("%.2f", getSafeSales(ReportService.getMonthlySales())));
+            updateStatCard(totalRevCard, "RM " + String.format("%.2f", ReportService.getTotalRevenue()));
+            updateStatCard(totalBookCard, String.valueOf(ReportService.getTotalBookingCount()));
+            refreshBookingTable(tableModel);
+        });
 
         cardsWrapper.add(tableSection, BorderLayout.CENTER);
         panel.add(cardsWrapper, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    private void refreshBookingTable(DefaultTableModel model) {
+        model.setRowCount(0);
+        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        BookingService.getAllBookings().stream()
+            .sorted((b1, b2) -> b2.getStartTime().compareTo(b1.getStartTime())) // Newest first
+            .forEach(b -> model.addRow(new Object[]{
+                b.getId(), 
+                b.getCustomerId(), 
+                b.getHallId(), 
+                b.getStartTime().format(fmt), 
+                String.format("%.2f", b.getTotalPrice()),
+                b.getStatus()
+            }));
     }
 
     private JPanel createStatCard(String title, String value, Color accentColor, String subtitle) {
@@ -172,9 +194,14 @@ public class ManagerDashboard extends BaseDashboard {
         JTextField searchField = new JTextField(18);
         HallButton searchBtn = HallButton.secondary("Search");
         
-        filterPanel.add(new JLabel("Search Issues: "));
+        filterPanel.add(new JLabel("Search: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
+        
+        filterPanel.add(Box.createHorizontalStrut(20));
+        filterPanel.add(new JLabel("Sort By: "));
+        JComboBox<String> sortBox = new JComboBox<>(new String[]{"Issue ID", "Status", "Description"});
+        filterPanel.add(sortBox);
 
         JPanel headerArea = new JPanel(new BorderLayout());
         headerArea.setBackground(StyleConfig.BACKGROUND_COLOR);
@@ -190,6 +217,13 @@ public class ManagerDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshIssueTable(model, "");
         searchBtn.addActionListener(e -> refreshIssueTable(model, searchField.getText()));
+        searchField.addActionListener(e -> searchBtn.doClick());
+
+        sortBox.addActionListener(e -> {
+            int col = sortBox.getSelectedIndex() == 0 ? 0 : (sortBox.getSelectedIndex() == 1 ? 5 : 3);
+            table.getRowSorter().setSortKeys(java.util.List.of(new RowSorter.SortKey(col, SortOrder.ASCENDING)));
+        });
+
         table.getColumnModel().getColumn(5).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
@@ -261,5 +295,10 @@ public class ManagerDashboard extends BaseDashboard {
                 .filter(i -> filter.isEmpty() || i.getDescription().toLowerCase().contains(filter.toLowerCase()))
                 .forEach(i -> model.addRow(new Object[]{i.getId(), i.getCustomerId(), i.getBookingId(), i.getDescription(),
                     i.getAssignedTo() != null ? i.getAssignedTo() : "Unassigned", i.getStatus()}));
+    }
+
+    private double getSafeSales(java.util.Map<String, Double> sales) {
+        if (sales == null || sales.isEmpty()) return 0.0;
+        return sales.values().iterator().next();
     }
 }
