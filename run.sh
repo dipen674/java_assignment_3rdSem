@@ -5,7 +5,7 @@
 # 1. Configuration
 SRC_DIR="src"
 BIN_DIR="bin"
-MAIN_CLASS="com.hallsymphony.ui.MainFrame"
+MAIN_CLASS="HallSymphony"
 
 # 2. Setup
 echo "--- Initializing Hall Booking Management System ---"
@@ -14,6 +14,7 @@ mkdir -p "$BIN_DIR"
 # 3. Compilation
 echo "Compiling source files..."
 find "$SRC_DIR" -name "*.java" > sources.txt
+echo "HallSymphony.java" >> sources.txt
 javac -d "$BIN_DIR" @sources.txt
 
 if [ $? -eq 0 ]; then

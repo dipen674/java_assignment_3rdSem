@@ -1,8 +1,11 @@
+src/TestLogin.java
+src/HallSymphony.java
 src/com/hallsymphony/util/DataStorage.java
 src/com/hallsymphony/util/StyleConfig.java
 src/com/hallsymphony/util/DataInitializer.java
 src/com/hallsymphony/ui/AdminDashboard.java
 src/com/hallsymphony/ui/ManagerDashboard.java
+src/com/hallsymphony/ui/components/HallButton.java
 src/com/hallsymphony/ui/BaseDashboard.java
 src/com/hallsymphony/ui/CustomerDashboard.java
 src/com/hallsymphony/ui/LoginPanel.java

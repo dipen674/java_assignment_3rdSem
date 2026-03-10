@@ -3,8 +3,11 @@ package com.hallsymphony.ui;
 import com.hallsymphony.model.*;
 import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
@@ -19,9 +22,9 @@ public class AdminDashboard extends BaseDashboard {
 
     @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "\uD83D\uDC65  Staff Management", "STAFF");
-        addSidebarButton(sidebar, "\uD83D\uDC64  User Management", "USERS");
-        addSidebarButton(sidebar, "\uD83D\uDCCB  All Bookings", "BOOKINGS");
+        addSidebarButton(sidebar, "  Staff Management", "STAFF");
+        addSidebarButton(sidebar, "  User Management", "USERS");
+        addSidebarButton(sidebar, "  All Bookings", "BOOKINGS");
     }
 
     private void initContent() {
@@ -37,13 +40,13 @@ public class AdminDashboard extends BaseDashboard {
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("Scheduler Staff Management"), BorderLayout.WEST);
 
         JPanel filterPanel = StyleConfig.createFilterPanel();
         JTextField searchField = new JTextField(18);
-        JButton searchBtn = new JButton("Search");
-        StyleConfig.styleSecondaryButton(searchBtn);
+        HallButton searchBtn = HallButton.secondary("Search");
+        
         filterPanel.add(new JLabel("Search Staff: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
@@ -63,13 +66,14 @@ public class AdminDashboard extends BaseDashboard {
         searchBtn.addActionListener(e -> refreshStaffTable(model, searchField.getText()));
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton addBtn = new JButton("Add Scheduler");
-        StyleConfig.styleSuccessButton(addBtn);
-        JButton editBtn = new JButton("Edit Staff");
-        StyleConfig.styleButton(editBtn);
-        JButton deleteBtn = new JButton("Delete");
-        StyleConfig.styleDangerButton(deleteBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton addBtn = HallButton.success("Add Scheduler");
+        
+        HallButton editBtn = HallButton.primary("Edit Staff");
+        
+        HallButton deleteBtn = HallButton.danger("Delete");
+        
 
         addBtn.addActionListener(e -> showStaffForm(null, model));
         editBtn.addActionListener(e -> {
@@ -153,13 +157,13 @@ public class AdminDashboard extends BaseDashboard {
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("All Users"), BorderLayout.WEST);
 
         JPanel filterPanel = StyleConfig.createFilterPanel();
         JTextField searchField = new JTextField(18);
-        JButton searchBtn = new JButton("Search");
-        StyleConfig.styleSecondaryButton(searchBtn);
+        HallButton searchBtn = HallButton.secondary("Search");
+        
         filterPanel.add(new JLabel("Search Users: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
@@ -177,11 +181,15 @@ public class AdminDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshUserTable(model, "");
         searchBtn.addActionListener(e -> refreshUserTable(model, searchField.getText()));
+        // Render the "Status" column (Active) as a green badge
+        table.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
+
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton deleteUserBtn = new JButton("Delete User");
-        StyleConfig.styleDangerButton(deleteUserBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton deleteUserBtn = HallButton.danger("Delete User");
+        
         deleteUserBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {
@@ -215,7 +223,7 @@ public class AdminDashboard extends BaseDashboard {
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("All Customer Bookings"), BorderLayout.WEST);
 
         JPanel filterPanel = StyleConfig.createFilterPanel();
@@ -230,8 +238,8 @@ public class AdminDashboard extends BaseDashboard {
         timeFilter.setPreferredSize(new Dimension(110, 32));
         filterPanel.add(timeFilter);
 
-        JButton filterBtn = new JButton("Apply Filters");
-        StyleConfig.styleSecondaryButton(filterBtn);
+        HallButton filterBtn = HallButton.secondary("Apply Filters");
+        
         filterPanel.add(filterBtn);
 
         JPanel headerArea = new JPanel(new BorderLayout());
@@ -247,6 +255,8 @@ public class AdminDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshBookingTable(model, "All", "All");
         filterBtn.addActionListener(e -> refreshBookingTable(model, (String) statusFilter.getSelectedItem(), (String) timeFilter.getSelectedItem()));
+        table.getColumnModel().getColumn(5).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
+        
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
         return panel;

@@ -52,89 +52,74 @@ The system supports **four user roles** — Customer, Scheduler (Staff), Adminis
 
 ### Prerequisites
 
-- **Java Development Kit (JDK) 11 or higher** must be installed.
-- Verify by opening a terminal/command prompt and typing:
+- **Java Development Kit (JDK) 14 or higher** must be installed.
+- Verify with:
   ```
   java -version
   javac -version
   ```
-  Both commands should show version 11 or higher.
+  Both commands should report version 14 or higher.
 
-> ⚠️ **IMPORTANT:** You must always run all commands from the **project root directory** (the folder that contains `src/`, `data/`, and `run.sh`). If you run from a different folder, the application will not find the data files.
-
----
-
-### Option A: Using a Script (Recommended — One Command!)
-
-#### 🐧 Linux / macOS
-```bash
-cd /path/to/Java_Assignment
-chmod +x run.sh       # Only needed the first time
-./run.sh
-```
-
-#### 🪟 Windows — Command Prompt
-```cmd
-cd C:\path\to\Java_Assignment
-run.bat
-```
-Or simply **double-click** `run.bat` in File Explorer!
-
-Both scripts automatically:
-1. Create the `bin/` output directory if it doesn't exist
-2. Find all `.java` source files
-3. Compile them with `javac`
-4. Launch the application with `java`
+> ⚠️ **IMPORTANT:** Always run commands from the **project root directory** (the folder containing `src/`, `bin/`, and `data/`). If you run from a different folder the application cannot find its data files.
 
 ---
 
-### Option B: Manual Compilation & Run (All Platforms)
+### Step 1 — Compile
 
-Use this method if the scripts don't work on your system.
-
-#### 🪟 Windows — Command Prompt (cmd)
-
-```cmd
-cd C:\path\to\Java_Assignment
-mkdir bin
-dir /s /b src\*.java > sources.txt
-javac -d bin @sources.txt
-java -cp bin com.hallsymphony.ui.MainFrame
-```
-
-#### 🪟 Windows — PowerShell
-
-```powershell
-cd C:\path\to\Java_Assignment
-New-Item -ItemType Directory -Force -Path bin
-Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object { $_.FullName } | Out-File -Encoding ascii sources.txt
-javac -d bin "@sources.txt"
-java -cp bin com.hallsymphony.ui.MainFrame
-```
-
-#### 🍎 macOS / 🐧 Linux — Terminal
+**Run this single command from the project root directory:**
 
 ```bash
-cd /path/to/Java_Assignment
-mkdir -p bin
-find src -name "*.java" > sources.txt
-javac -d bin @sources.txt
-java -cp bin com.hallsymphony.ui.MainFrame
+javac -sourcepath src -d bin HallSymphony.java
 ```
+
+*(This command works identically on Windows Command Prompt, PowerShell, Linux, and macOS.)*
+
+This compiles every `.java` file and places the `.class` output in the `bin/` folder.
 
 ---
 
-### 🔄 To Recompile After Code Changes
+### Step 2 — Run
 
-If you make changes to the source code, just repeat the **compile** and **run** commands. You do not need to delete the `bin` folder.
+```
+java -cp bin HallSymphony
+```
 
-### Why must you run from the project root directory?
+That's it — **one familiar command** to launch the application.
 
-The `DataStorage.java` utility resolves data files relative to the **current working directory**:
+---
+
+### 🔄 Recompiling After Changes
+
+If you edit any source file, just re-run Steps 1 and 2. No need to delete `bin/`.
+
+---
+
+### 💡 IDE Users (VS Code, Eclipse, IntelliJ)
+
+If you are opening this project in an IDE:
+- **VS Code:** The included `.vscode/settings.json`, `.project`, and `.classpath` files explicitly instruct the Java extension to place all compiled `.class` files into the `bin/` directory. **This prevents your `src/` folder from becoming horribly messy with compiled files.**
+- If you use **IntelliJ IDEA**, mark `src` as the Sources Root and `bin` as the Output Path in `File > Project Structure > Modules`.
+
+---
+
+### 🚨 Troubleshooting Common Errors
+
+#### ❌ The application lost all its data / users disappeared!
+**Why:** You likely ran the `java` command from inside the `src/` or `bin/` folder instead of the project root.
+**Fix:** The code dynamically searches for the `data/db/` folder relative to where you launched the program. **Always run the application from the project root** (`cd Java_Assignment`), never from inside `src/`.
+
+#### ❌ I got "error: package does not exist" when running `javac HallSymphony.java`!
+**Why:** You just typed `javac HallSymphony.java` without telling the compiler where the rest of the code is. It didn't know to look inside the `src/` folder for `StyleConfig`, `MainFrame`, etc.
+**Fix:** Always include the `-sourcepath src` flag so Java knows where its friends are:
+`javac -sourcepath src -d bin HallSymphony.java`
+
+### Why run from the project root?
+
+`DataStorage.java` resolves data files using a relative path:
 ```java
 private static final String BASE_PATH = "data/db/";
 ```
-If you run `java` from inside the `src/` or `bin/` folder, the application will not find `data/db/` and will silently create empty data. **Always run from the project root.**
+Running from inside `src/` or `bin/` will cause empty-data issues. **Always run from the project root.**
 
 ---
 
@@ -169,9 +154,8 @@ These accounts are pre-loaded in `data/db/users.txt`.
 ```
 Java_Assignment/
 │
-├── run.sh                        # Shell script to compile & run (Linux/macOS)
-├── run.bat                       # Batch script to compile & run (Windows)
 ├── sources.txt                   # Auto-generated list of .java files (used by javac)
+├── HallSymphony.java             # ★ APPLICATION ENTRY POINT — compile & run this
 ├── .gitignore
 │
 ├── src/                          # All Java source code
@@ -208,7 +192,7 @@ Java_Assignment/
 │       └── util/                 # UTILITIES
 │           ├── DataStorage.java  # Reads/writes .txt files (the "database layer")
 │           ├── DataInitializer.java  # Seeds default data on first run
-│           └── StyleConfig.java  # Centralized colours & fonts for the UI
+│           └── StyleConfig.java  # Centralized colours & fonts (Nimbus L&F enforced)
 │
 ├── bin/                          # Compiled .class files (auto-generated, do not edit)
 │

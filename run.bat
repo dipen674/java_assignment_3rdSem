@@ -5,6 +5,7 @@ if not exist bin mkdir bin
 
 echo Compiling source files...
 dir /s /b src\*.java > sources.txt
+echo %CD%\HallSymphony.java >> sources.txt
 javac -d bin @sources.txt
 
 if %ERRORLEVEL% NEQ 0 (
@@ -16,5 +17,5 @@ if %ERRORLEVEL% NEQ 0 (
 echo Compilation successful!
 echo Launching application...
 echo --------------------------------------------------
-java -cp bin com.hallsymphony.ui.MainFrame
+java -cp bin HallSymphony
 pause

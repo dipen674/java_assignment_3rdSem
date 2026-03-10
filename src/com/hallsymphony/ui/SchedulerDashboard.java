@@ -3,8 +3,11 @@ package com.hallsymphony.ui;
 import com.hallsymphony.model.*;
 import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
@@ -19,11 +22,10 @@ public class SchedulerDashboard extends BaseDashboard {
         initContent();
     }
 
-    @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "\uD83C\uDFE2  Manage Halls", "HALLS");
-        addSidebarButton(sidebar, "\uD83D\uDCC5  Scheduling", "SCHEDULING");
-        addSidebarButton(sidebar, "\uD83D\uDD27  Maintenance", "MAINTENANCE");
+        addSidebarButton(sidebar, "  Manage Halls", "HALLS");
+        addSidebarButton(sidebar, "  Scheduling", "SCHEDULING");
+        addSidebarButton(sidebar, "  Maintenance", "MAINTENANCE");
     }
 
     private void initContent() {
@@ -40,15 +42,15 @@ public class SchedulerDashboard extends BaseDashboard {
         // Title
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("Hall Management"), BorderLayout.WEST);
 
         // Filter
         JPanel filterPanel = StyleConfig.createFilterPanel();
         JTextField searchField = new JTextField(18);
         searchField.setPreferredSize(new Dimension(200, 32));
-        JButton searchBtn = new JButton("Search");
-        StyleConfig.styleSecondaryButton(searchBtn);
+        HallButton searchBtn = HallButton.secondary("Search");
+        
         filterPanel.add(new JLabel("Search: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
@@ -70,13 +72,14 @@ public class SchedulerDashboard extends BaseDashboard {
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
         // Buttons
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton addBtn = new JButton("Add Hall");
-        StyleConfig.styleSuccessButton(addBtn);
-        JButton editBtn = new JButton("Edit Hall");
-        StyleConfig.styleButton(editBtn);
-        JButton deleteBtn = new JButton("Delete");
-        StyleConfig.styleDangerButton(deleteBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton addBtn = HallButton.success("Add Hall");
+        
+        HallButton editBtn = HallButton.primary("Edit Hall");
+        
+        HallButton deleteBtn = HallButton.danger("Delete");
+        
 
         addBtn.addActionListener(e -> showHallForm(null, model, searchField));
         editBtn.addActionListener(e -> {
@@ -173,7 +176,7 @@ public class SchedulerDashboard extends BaseDashboard {
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("Hall Schedules"), BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
 
@@ -183,13 +186,15 @@ public class SchedulerDashboard extends BaseDashboard {
         };
         JTable table = new JTable(model);
         refreshScheduleTable(model);
+        table.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton addBtn = new JButton("Add Schedule");
-        StyleConfig.styleSuccessButton(addBtn);
-        JButton deleteBtn = new JButton("Delete Schedule");
-        StyleConfig.styleDangerButton(deleteBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton addBtn = HallButton.success("Add Schedule");
+        
+        HallButton deleteBtn = HallButton.danger("Delete Schedule");
+        
 
         addBtn.addActionListener(e -> showScheduleForm(model));
         deleteBtn.addActionListener(e -> {
@@ -280,7 +285,7 @@ public class SchedulerDashboard extends BaseDashboard {
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("My Assigned Maintenance Tasks"), BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
 
@@ -290,11 +295,13 @@ public class SchedulerDashboard extends BaseDashboard {
         };
         JTable table = new JTable(model);
         refreshMaintenanceTable(model);
+        table.getColumnModel().getColumn(2).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton completeBtn = new JButton("Mark as Done");
-        StyleConfig.styleSuccessButton(completeBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton completeBtn = HallButton.success("Mark as Done");
+        
         completeBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {

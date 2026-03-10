@@ -3,8 +3,11 @@ package com.hallsymphony.ui;
 import com.hallsymphony.model.*;
 import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDateTime;
@@ -22,10 +25,10 @@ public class CustomerDashboard extends BaseDashboard {
 
     @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "\uD83C\uDFE2  Available Halls", "HALLS");
-        addSidebarButton(sidebar, "\uD83D\uDCC5  My Bookings", "BOOKINGS");
-        addSidebarButton(sidebar, "\u26A0  Report Issue", "ISSUES");
-        addSidebarButton(sidebar, "\uD83D\uDC64  Profile", "PROFILE");
+        addSidebarButton(sidebar, "  Available Halls", "HALLS");
+        addSidebarButton(sidebar, "  My Bookings", "BOOKINGS");
+        addSidebarButton(sidebar, "  Report Issue", "ISSUES");
+        addSidebarButton(sidebar, "  Profile", "PROFILE");
     }
 
     private void initContent() {
@@ -43,7 +46,7 @@ public class CustomerDashboard extends BaseDashboard {
         // Title
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("Available Halls"), BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
 
@@ -57,9 +60,10 @@ public class CustomerDashboard extends BaseDashboard {
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
         // Button bar
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton bookBtn = new JButton("Book Selected Hall");
-        StyleConfig.styleButton(bookBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton bookBtn = HallButton.primary("Book Selected Hall");
+        
         bookBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {
@@ -136,7 +140,7 @@ public class CustomerDashboard extends BaseDashboard {
                     "Rate:       RM %.2f/hr\n" +
                     "─────────────────────\n" +
                     "TOTAL:      RM %.2f\n\n" +
-                    "Proceed with payment?",
+                    "Do you wish to proceed with the payment?",
                     hall.getName(), hall.getType(),
                     start.format(fmt), end.format(fmt),
                     hours, rate, total
@@ -168,14 +172,13 @@ public class CustomerDashboard extends BaseDashboard {
         // Title + Filter
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("My Bookings"), BorderLayout.WEST);
 
         JPanel filterPanel = StyleConfig.createFilterPanel();
         JComboBox<String> statusFilter = new JComboBox<>(new String[]{"All", "Upcoming", "Past", "PAID", "CANCELLED"});
         statusFilter.setPreferredSize(new Dimension(130, 32));
-        JButton refreshBtn = new JButton("Apply Filter");
-        StyleConfig.styleSecondaryButton(refreshBtn);
+        HallButton refreshBtn = HallButton.secondary("Apply Filter");
 
         filterPanel.add(new JLabel("Filter: "));
         filterPanel.add(statusFilter);
@@ -196,12 +199,15 @@ public class CustomerDashboard extends BaseDashboard {
         refreshBookingTable(model, "All");
         refreshBtn.addActionListener(e -> refreshBookingTable(model, (String) statusFilter.getSelectedItem()));
 
+        table.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
+        
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
         // Cancel button
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton cancelBtn = new JButton("Cancel Selected Booking");
-        StyleConfig.styleDangerButton(cancelBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton cancelBtn = HallButton.danger("Cancel Selected Booking");
+        
         cancelBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {
@@ -245,7 +251,7 @@ public class CustomerDashboard extends BaseDashboard {
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("My Issues"), BorderLayout.WEST);
         panel.add(topPanel, BorderLayout.NORTH);
 
@@ -256,11 +262,14 @@ public class CustomerDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshIssueTable(model);
 
+        table.getColumnModel().getColumn(3).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
+
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
-        JPanel btnPanel = StyleConfig.createButtonPanel();
-        JButton reportBtn = new JButton("Report New Issue");
-        StyleConfig.styleButton(reportBtn);
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
+        HallButton reportBtn = HallButton.primary("Report New Issue");
+        
         reportBtn.addActionListener(e -> {
             JTextField bIdField = new JTextField();
             JTextField descField = new JTextField();
@@ -313,15 +322,13 @@ public class CustomerDashboard extends BaseDashboard {
 
         JTextField nameField = new JTextField(customer.getFullName());
         StyleConfig.styleTextField(nameField, "Full Name");
-        nameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 52));
         card.add(nameField);
-        card.add(Box.createVerticalStrut(12));
+        card.add(Box.createVerticalStrut(16));
 
         JTextField contactField = new JTextField(customer.getContact());
         StyleConfig.styleTextField(contactField, "Contact Number");
-        contactField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 52));
         card.add(contactField);
-        card.add(Box.createVerticalStrut(12));
+        card.add(Box.createVerticalStrut(16));
 
         JLabel usernameLabel = new JLabel("Username: " + customer.getUsername());
         usernameLabel.setFont(StyleConfig.SMALL_FONT);
@@ -330,8 +337,8 @@ public class CustomerDashboard extends BaseDashboard {
         card.add(usernameLabel);
         card.add(Box.createVerticalStrut(20));
 
-        JButton saveBtn = new JButton("Save Changes");
-        StyleConfig.styleSuccessButton(saveBtn);
+        HallButton saveBtn = HallButton.primary("Save Changes");
+        
         saveBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         saveBtn.addActionListener(e -> {
             String newName = nameField.getText().trim();

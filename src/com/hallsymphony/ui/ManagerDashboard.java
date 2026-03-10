@@ -3,8 +3,11 @@ package com.hallsymphony.ui;
 import com.hallsymphony.model.*;
 import com.hallsymphony.service.*;
 import com.hallsymphony.util.StyleConfig;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.border.*;
+import com.hallsymphony.ui.components.HallButton;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -18,10 +21,9 @@ public class ManagerDashboard extends BaseDashboard {
         initContent();
     }
 
-    @Override
     protected void addSidebarButtons(JPanel sidebar) {
-        addSidebarButton(sidebar, "\uD83D\uDCCA  Sales Dashboard", "SALES");
-        addSidebarButton(sidebar, "\uD83D\uDD27  Issue Management", "MAINTENANCE");
+        addSidebarButton(sidebar, "  Sales Dashboard", "SALES");
+        addSidebarButton(sidebar, "  Issue Management", "MAINTENANCE");
     }
 
     private void initContent() {
@@ -39,8 +41,8 @@ public class ManagerDashboard extends BaseDashboard {
         topPanel.setBorder(new EmptyBorder(0, 0, 16, 0));
         topPanel.add(StyleConfig.createSectionTitle("Sales Overview"), BorderLayout.WEST);
 
-        JButton refreshBtn = new JButton("Refresh Data");
-        StyleConfig.styleSecondaryButton(refreshBtn);
+        HallButton refreshBtn = HallButton.secondary("Refresh Data");
+        
         topPanel.add(refreshBtn, BorderLayout.EAST);
         panel.add(topPanel, BorderLayout.NORTH);
 
@@ -94,6 +96,7 @@ public class ManagerDashboard extends BaseDashboard {
         BookingService.getAllBookings().stream()
             .filter(b -> b.getStatus().equals("PAID"))
             .forEach(b -> tableModel.addRow(new Object[]{b.getId(), b.getCustomerId(), b.getHallId(), b.getStartTime().format(fmt), String.format("%.2f", b.getTotalPrice())}));
+        bookingTable.getColumnModel().getColumn(4).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         tableSection.add(StyleConfig.createStyledScrollPane(bookingTable), BorderLayout.CENTER);
 
         cardsWrapper.add(tableSection, BorderLayout.CENTER);
@@ -107,7 +110,7 @@ public class ManagerDashboard extends BaseDashboard {
         card.setBackground(StyleConfig.CARD_COLOR);
         card.setBorder(new CompoundBorder(
             new CompoundBorder(
-                new LineBorder(StyleConfig.BORDER_COLOR, 1, true),
+                BorderFactory.createMatteBorder(0, 1, 3, 1, StyleConfig.BORDER_COLOR), // Faux drop-shadow
                 new MatteBorder(4, 0, 0, 0, accentColor)  // Top accent stripe
             ),
             new EmptyBorder(20, 24, 20, 24)
@@ -162,13 +165,13 @@ public class ManagerDashboard extends BaseDashboard {
         // Header
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(StyleConfig.BACKGROUND_COLOR);
-        topPanel.setBorder(new EmptyBorder(0, 0, 12, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 24, 0));
         topPanel.add(StyleConfig.createSectionTitle("Customer Issues & Maintenance"), BorderLayout.WEST);
 
         JPanel filterPanel = StyleConfig.createFilterPanel();
         JTextField searchField = new JTextField(18);
-        JButton searchBtn = new JButton("Search");
-        StyleConfig.styleSecondaryButton(searchBtn);
+        HallButton searchBtn = HallButton.secondary("Search");
+        
         filterPanel.add(new JLabel("Search Issues: "));
         filterPanel.add(searchField);
         filterPanel.add(searchBtn);
@@ -187,13 +190,15 @@ public class ManagerDashboard extends BaseDashboard {
         JTable table = new JTable(model);
         refreshIssueTable(model, "");
         searchBtn.addActionListener(e -> refreshIssueTable(model, searchField.getText()));
+        table.getColumnModel().getColumn(5).setCellRenderer(new StyleConfig.StatusBadgeRenderer());
         panel.add(StyleConfig.createStyledScrollPane(table), BorderLayout.CENTER);
 
         // Buttons
-        JPanel btnPanel = StyleConfig.createButtonPanel();
+        JPanel btnPanel = StyleConfig.createActionBar();
+        btnPanel.setBorder(new EmptyBorder(16, 0, 0, 0));
 
-        JButton assignBtn = new JButton("Assign Scheduler");
-        StyleConfig.styleButton(assignBtn);
+        HallButton assignBtn = HallButton.primary("Assign Scheduler");
+        
         assignBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {
@@ -224,8 +229,8 @@ public class ManagerDashboard extends BaseDashboard {
             }
         });
 
-        JButton statusBtn = new JButton("Update Status");
-        StyleConfig.styleSuccessButton(statusBtn);
+        HallButton statusBtn = HallButton.success("Update Status");
+        
         statusBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row >= 0) {

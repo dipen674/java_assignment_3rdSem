@@ -11,3 +11,5 @@ CUST10|sunita|sunita123|Customer|Sunita Rai|9845678905
 CUST11|bishal|bishal123|Customer|Bishal Bhattarai|9856789016
 CUST12|nisha|nisha123|Customer|Nisha Poudel|9867890127
 SCH13|ramesh|ramesh123|Scheduler|Ramesh Adhikari|9845152378
+SCH14|nikhil|nikhil123|Scheduler|nikhil khadka|902735343
+CUST15|shyam|shyam123|Customer|shyam|978498765
