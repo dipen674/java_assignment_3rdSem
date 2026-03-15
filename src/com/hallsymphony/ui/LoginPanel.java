@@ -154,7 +154,28 @@ public class LoginPanel extends JPanel {
 
         passField = (JPasswordField) createStyledInput(true);
         form.add(passField);
-        form.add(Box.createVerticalStrut(32));
+        
+        JCheckBox showPass = new JCheckBox("Show Password");
+        showPass.setOpaque(false);
+        showPass.setFont(StyleConfig.SMALL_FONT);
+        showPass.setForeground(StyleConfig.TEXT_SECONDARY);
+        showPass.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        showPass.addActionListener(e -> {
+            if (showPass.isSelected()) {
+                passField.setEchoChar((char) 0);
+            } else {
+                passField.setEchoChar('\u2022');
+            }
+        });
+        
+        JPanel passExtras = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        passExtras.setOpaque(false);
+        passExtras.setAlignmentX(Component.LEFT_ALIGNMENT);
+        passExtras.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+        passExtras.add(showPass);
+        form.add(passExtras);
+        
+        form.add(Box.createVerticalStrut(24));
 
         // Sign In button
         HallButton loginBtn = HallButton.primary("Sign In →");
