@@ -4,19 +4,6 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
-import com.hallsymphony.ui.components.HallButton;
-
-/**
- * StyleConfig — Central design system for Hall Symphony.
- *
- * Key design decisions:
- *  • Uses Metal L&F as base — 100% Java-painted, pixel-perfect on ALL platforms
- *    (Windows / Linux / WSL / macOS) with zero rendering differences.
- *  • Custom HallButton bypasses L&F button painting entirely.
- *  • "Dialog" font = JVM logical font, resolves to system's best sans-serif
- *    on every platform (DejaVu Sans on Linux, Segoe UI on Windows, etc.)
- *  • Anti-aliasing forced globally for crisp text at all DPI levels.
- */
 public class StyleConfig {
 
     // ── Primary Palette ──────────────────────────────────────────────────────
@@ -79,9 +66,7 @@ public class StyleConfig {
     public static final int GAP_LG = 24;
     public static final int GAP_XL = 40;
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Global Theme — call ONCE before any Swing code
-    // ─────────────────────────────────────────────────────────────────────────
     public static void applyGlobalTheme() {
 
         // 1. Enable high-quality anti-aliasing & sub-pixel rendering globally
@@ -99,7 +84,6 @@ public class StyleConfig {
         UIManager.put("nimbusBase",            PRIMARY_COLOR);
 
         // 4. Fonts — every Swing component in one place
-        Font[] fonts = { NORMAL_FONT };
         String[] components = {
             "Button", "Label", "TextField", "PasswordField", "TextArea",
             "ComboBox", "OptionPane", "ToolTip", "List", "MenuItem",
@@ -146,9 +130,7 @@ public class StyleConfig {
         UIManager.put("Label.foreground", TEXT_COLOR);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Button factories — use HallButton for cross-platform consistency
-    // ─────────────────────────────────────────────────────────────────────────
 
     public static void styleButton(JButton btn) {
         applyButtonStyle(btn, PRIMARY_COLOR, PRIMARY_DARK, WHITE);
@@ -164,9 +146,6 @@ public class StyleConfig {
         btn.setBorder(new CompoundBorder(new LineBorder(BORDER_COLOR, 1, true), new EmptyBorder(10, 20, 10, 20)));
     }
     public static void styleGhostButton(JButton btn) {
-        // This method was removed from the provided snippet, but I'll keep it as it's not explicitly removed.
-        // However, its implementation will be based on the new applyButtonStyle if possible, or removed if it doesn't fit.
-        // For now, I'll keep the original implementation as the new applyButtonStyle doesn't directly support ghost.
         Color bg=new Color(0,0,0,0), hover=PRIMARY_XLIGHT, fg=PRIMARY_COLOR, border=new Color(0,0,0,0);
         final Color _bg=bg, _hover=hover;
         btn.setBackground(bg);
@@ -185,45 +164,6 @@ public class StyleConfig {
         });
     }
 
-    /** Apply HallButton-style custom painting to a plain JButton (retrofit helper). */
-    private static void applyHallButtonStyle(JButton btn, HallButton.Variant v) {
-        // For new code, prefer HallButton.primary() etc. directly.
-        // This helper makes existing JButtons look right without refactoring every class.
-        // This method is replaced by the new applyButtonStyle, but since it's not explicitly removed,
-        // and the new applyButtonStyle doesn't cover all variants (like GHOST), I'll keep it
-        // and adapt it to use the new applyButtonStyle where appropriate, or keep its original logic.
-        // Given the instruction is to "enhance table/button styling methods", I'll assume the new
-        // applyButtonStyle is the preferred way and this helper might be deprecated or removed later.
-        // For now, I'll keep the original logic for HallButton.Variant as it's more specific.
-        Color bg, hover, fg, border;
-        switch (v) {
-            case DANGER:
-                bg=ACCENT_COLOR; hover=ACCENT_DARK; fg=WHITE; border=ACCENT_DARK; break;
-            case SUCCESS:
-                bg=SUCCESS_COLOR; hover=SUCCESS_DARK; fg=WHITE; border=SUCCESS_DARK; break;
-            case SECONDARY:
-                bg=WHITE; hover=BACKGROUND_COLOR; fg=TEXT_COLOR; border=BORDER_COLOR; break;
-            case GHOST:
-                bg=new Color(0,0,0,0); hover=PRIMARY_XLIGHT; fg=PRIMARY_COLOR; border=new Color(0,0,0,0); break;
-            default: // PRIMARY
-                bg=PRIMARY_COLOR; hover=PRIMARY_DARK; fg=WHITE; border=PRIMARY_DARK; break;
-        }
-        final Color _bg=bg, _hover=hover;
-        btn.setBackground(bg);
-        btn.setForeground(fg);
-        btn.setFont(BOLD_FONT);
-        btn.setFocusPainted(false);
-        btn.setOpaque(true);
-        btn.setContentAreaFilled(true);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new CompoundBorder(
-            new LineBorder(border, 1, true),
-            new EmptyBorder(8, 20, 8, 20)));
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent e) { btn.setBackground(_hover); }
-            public void mouseExited(java.awt.event.MouseEvent e)  { btn.setBackground(_bg); }
-        });
-    }
 
     private static void applyButtonStyle(JButton btn, Color bg, Color hover, Color fg) {
         btn.setBackground(bg);
@@ -241,9 +181,7 @@ public class StyleConfig {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Input field styling
-    // ─────────────────────────────────────────────────────────────────────────
 
     public static void styleTextField(JTextField field, String label) {
         field.setBorder(BorderFactory.createCompoundBorder(
@@ -256,9 +194,7 @@ public class StyleConfig {
         field.setCaretColor(PRIMARY_COLOR);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Table
-    // ─────────────────────────────────────────────────────────────────────────
 
     public static void styleTable(JTable table) {
         table.setAutoCreateRowSorter(true);
@@ -302,9 +238,7 @@ public class StyleConfig {
         return sp;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Composite component builders
-    // ─────────────────────────────────────────────────────────────────────────
 
     public static JPanel createCard(int padding) {
         JPanel p = new JPanel(new BorderLayout());
@@ -342,9 +276,7 @@ public class StyleConfig {
         return form;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Table Cell Renderers
-    // ─────────────────────────────────────────────────────────────────────────
 
     public static class StatusBadgeRenderer extends DefaultTableCellRenderer {
         @Override
