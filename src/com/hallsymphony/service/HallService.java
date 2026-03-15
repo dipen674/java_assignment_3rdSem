@@ -3,6 +3,7 @@ package com.hallsymphony.service;
 import com.hallsymphony.model.Hall;
 import com.hallsymphony.model.Schedule;
 import com.hallsymphony.util.DataStorage;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -76,10 +77,22 @@ public class HallService {
 
     public static List<Schedule> getSchedulesByHall(String hallId) {
         return getAllSchedules().stream()
-                .filter(s -> s.getHallId().equals(hallId))
+                .filter(s -> Objects.equals(s.getHallId(), hallId))
                 .collect(Collectors.toList());
     }
 
+    // Bug fix: max-ID based generation
+    private static int getNextScheduleId() {
+        List<Schedule> schedules = getAllSchedules();
+        int maxId = 0;
+        for (Schedule s : schedules) {
+            try {
+                int num = Integer.parseInt(s.getId().replace("SCH", ""));
+                if (num > maxId) maxId = num;
+            } catch (NumberFormatException ignored) {}
+        }
+        return maxId + 1;
+    }
 
     public static synchronized boolean addSchedule(Schedule schedule) {
         List<Schedule> schedules = getAllSchedules();

@@ -2,7 +2,9 @@ package com.hallsymphony.service;
 
 import com.hallsymphony.model.Booking;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ReportService {
     public static double getSalesForPeriod(LocalDateTime start, LocalDateTime end) {
