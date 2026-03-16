@@ -14,7 +14,7 @@ public class Booking implements Serializable {
     private String status; // PENDING, PAID, CANCELLED
     private String remarks;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     public Booking(String id, String customerId, String hallId, LocalDateTime startTime, LocalDateTime endTime, double totalPrice, String status, String remarks) {
         this.id = id;
@@ -41,7 +41,10 @@ public class Booking implements Serializable {
 
     @Override
     public String toString() {
-        return String.join("|", id, customerId, hallId, startTime.format(formatter), endTime.format(formatter), String.valueOf(totalPrice), status, remarks);
+        return String.join("|", id, customerId, hallId, 
+            startTime.withNano(0).format(formatter), 
+            endTime.withNano(0).format(formatter), 
+            String.valueOf(totalPrice), status, remarks);
     }
 
     public static Booking fromString(String data) {

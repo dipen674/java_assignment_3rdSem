@@ -127,8 +127,14 @@ public class CustomerDashboard extends BaseDashboard {
         int option = JOptionPane.showConfirmDialog(this, dialogPanel, "Book Hall", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             try {
-                LocalDateTime start = LocalDateTime.parse(startField.getText().trim());
-                LocalDateTime end = LocalDateTime.parse(endField.getText().trim());
+                LocalDateTime start = LocalDateTime.parse(startField.getText().trim()).withNano(0);
+                LocalDateTime end = LocalDateTime.parse(endField.getText().trim()).withNano(0);
+
+                // Validation: start must be in the future
+                if (!ValidationUtil.isFutureDateTime(start)) {
+                    JOptionPane.showMessageDialog(this, "Booking date must be in the future.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
                 // Validation: start must be before end
                 if (!start.isBefore(end)) {

@@ -12,7 +12,7 @@ public class Schedule implements Serializable {
     private String type; // AVAILABILITY, MAINTENANCE
     private String remarks;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     public Schedule(String id, String hallId, LocalDateTime startTime, LocalDateTime endTime, String type, String remarks) {
         this.id = id;
@@ -44,7 +44,10 @@ public class Schedule implements Serializable {
 
     @Override
     public String toString() {
-        return String.join("|", id, hallId, startTime.format(formatter), endTime.format(formatter), type, remarks != null ? remarks : "");
+        return String.join("|", id, hallId, 
+            startTime.withNano(0).format(formatter), 
+            endTime.withNano(0).format(formatter), 
+            type, remarks != null ? remarks : "");
     }
 
     public static Schedule fromString(String data) {

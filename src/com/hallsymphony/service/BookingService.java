@@ -39,6 +39,11 @@ public class BookingService {
     }
 
     public static synchronized boolean createBooking(String customerId, String hallId, LocalDateTime start, LocalDateTime end, double price, String remarks) {
+        // Validation: start must be in the future
+        if (!com.hallsymphony.util.ValidationUtil.isFutureDateTime(start)) {
+            return false;
+        }
+
         // Validation: start must be before end
         if (!start.isBefore(end)) {
             return false;

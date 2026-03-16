@@ -95,6 +95,11 @@ public class HallService {
     }
 
     public static synchronized boolean addSchedule(Schedule schedule) {
+        // Validation: start must be in the future
+        if (!com.hallsymphony.util.ValidationUtil.isFutureDateTime(schedule.getStartTime())) {
+            return false;
+        }
+
         List<Schedule> schedules = getAllSchedules();
         // Check for maintenance overlapping
         if (schedule.getType().equals("MAINTENANCE")) {

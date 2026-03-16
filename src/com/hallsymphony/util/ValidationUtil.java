@@ -50,4 +50,17 @@ public class ValidationUtil {
             return false;
         }
     }
+
+    public static boolean isFutureDateTime(LocalDateTime dateTime) {
+        return dateTime != null && dateTime.isAfter(LocalDateTime.now());
+    }
+
+    /**
+     * Formats a LocalDateTime to ISO format without nanoseconds.
+     * Example: 2026-03-17T14:00:00
+     */
+    public static String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) return "";
+        return dateTime.withNano(0).toString();
+    }
 }

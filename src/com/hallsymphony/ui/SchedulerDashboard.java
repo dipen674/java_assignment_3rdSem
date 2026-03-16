@@ -303,8 +303,13 @@ public class SchedulerDashboard extends BaseDashboard {
                 return;
             }
 
-            java.time.LocalDateTime start = java.time.LocalDateTime.parse(startStr);
-            java.time.LocalDateTime end = java.time.LocalDateTime.parse(endStr);
+            java.time.LocalDateTime start = java.time.LocalDateTime.parse(startStr).withNano(0);
+            java.time.LocalDateTime end = java.time.LocalDateTime.parse(endStr).withNano(0);
+
+            if (!ValidationUtil.isFutureDateTime(start)) {
+                JOptionPane.showMessageDialog(this, "Schedule date must be in the future.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             if (!start.isBefore(end)) {
                 JOptionPane.showMessageDialog(this, "Start time must be before end time.", "Validation Error", JOptionPane.ERROR_MESSAGE);
