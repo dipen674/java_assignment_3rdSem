@@ -6,3 +6,4 @@ ISSUE5|CUST11|BOOK7|WiFi connectivity was very poor during the workshop|OPEN|NON
 ISSUE6|CUST7|BOOK3|Whiteboard markers were dried out and not replaced|CLOSED|SCH4
 ISSUE7|CUST10|BOOK6|Water dispenser was empty in the boardroom|DONE|SCH3
 ISSUE8|CUST5|Book6|The ac is not proper and is very bad|IN_PROGRESS|SCH13
+ISSUE9|CUST5|BKG16|the ac is bad|IN_PROGRESS|SCH3
