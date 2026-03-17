@@ -1,6 +1,6 @@
 ADM1|admin|admin123|Administrator|Deependra Bhatta|9841234567
 MAN2|manager|manager123|Manager|Rajesh Khatri|9851234568
-SCH3|staff|staff123|Scheduler|Suman Shrestha|9861234569
+SCH3|suman|suman123|Scheduler|Suman Shrestha|9861234569
 SCH4|bikash|bikash123|Scheduler|Bikash Tamang|9871234570
 SCH13|ramesh|ramesh123|Scheduler|Ramesh Adhikari|9845152378
 SCH14|hari|hari123|Scheduler|Hari khadka|9822457815
