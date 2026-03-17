@@ -1,59 +1,84 @@
 # 🏛️ Hall Symphony — Hall Booking Management System
 
-A high-performance, professional Java Desktop Application for streamlined hall reservations and management. Built with a focus on robust OOP principles and clean architectural separation.
+A high-performance, professional Java Desktop Application for streamlined hall reservations and management. Built with a focus on robust Object-Oriented Programming (OOP) principles and clean architectural separation.
 
 ---
 
 ## 🚀 Overview
-**Hall Symphony Inc.** provides a comprehensive digital solution for managing event spaces. The system supports multi-role access (Admin, Manager, Scheduler, Customer) and ensures data integrity through a custom flat-file database system.
+**Hall Symphony Inc.** provides a comprehensive digital solution for managing event spaces efficiently. The system is designed to handle the complexity of scheduling, financial reporting, and customer relationship management within a single, unified interface.
 
-### Key Capabilities:
-- **Customers**: Self-registration, hall browsing, real-time booking, and issue reporting.
-- **Schedulers**: Comprehensive hall CRUD and availability/maintenance scheduling.
-- **Administrators**: Centralized user account control and global booking oversight.
-- **Managers**: Strategic business analytics and service quality management.
+### The Problem it Solves:
+Traditional hall booking often suffers from double-bookings, fragmented communication, and lack of real-time availability. **Hall Symphony** eliminates these issues with a centralized scheduling engine and role-based access control.
+
+---
+
+## 👥 Roles & Responsibilities
+The system is built around four primary user personas, each with a specialized dashboard and set of capabilities:
+
+### 🛠️ Administrator (System Orchestrator)
+The Administrator ensures the platform's integrity and manages the workforce.
+- **Account Governance**: Full CRUD (Create, Read, Update, Delete) operations for all user accounts (Schedulers, Managers, Customers).
+- **System Oversight**: Global view of all system activities and bookings to resolve high-level conflicts.
+- **Security**: Ensures strict access control and data validation across the platform.
+
+### 📅 Scheduler (Operations Lead)
+The Scheduler is responsible for the physical inventory and timing of the halls.
+- **Inventory Management**: Comprehensive Hall management, including adding new spaces and updating hall specifications.
+- **Maintenance Planning**: Scheduling "Maintenance" slots to ensure halls are in peak condition, preventing bookings during these periods.
+- **Availability Matrix**: Managing the master schedule to prevent overlaps and optimize hall utilization.
+
+### 📈 Manager (Business Strategist)
+The Manager focuses on growth, financial health, and service quality.
+- **Business Intelligence**: Access to real-time sales reports (Weekly, Monthly, and Yearly) via the `ReportService`.
+- **Revenue Analytics**: Tracking total revenue, booking trends, and hall performance metrics.
+- **Quality Assurance**: Monitoring and addressing customer-reported issues to ensure high service standards.
+
+### 👤 Customer (End User)
+The Customer experiences the ease of booking through a streamlined self-service portal.
+- **Self-Service Registration**: Easy onboarding process to create a personalized profile.
+- **Discovery**: Browsing available halls with detailed descriptions and pricing.
+- **Booking Lifecycle**: Creating reservations, making payments, and managing personal booking history.
+- **Feedback Loop**: Reporting issues or providing feedback directly through the application.
 
 ---
 
 ## 🛠️ Core Technologies
-- **Language**: Java 14+
-- **Framework**: Java Swing (GUI)
-- **Persistence**: Flat-file (`.txt`) database system
-- **Styling**: Custom Design System (Segoe UI, HD Anti-aliasing)
+- **Language**: Java 14+ (Leveraging modern features like Records and Streams)
+- **Framework**: Java Swing (Custom GUI with high-fidelity rendering)
+- **Persistence**: **SymphonyDB** — A custom flat-file (`.txt`) database system ensuring extreme portability without external SQL dependencies.
+- **Styling**: Segoe UI typography with HD Anti-aliasing and a unified color tokens system.
 
 ---
 
 ## 🏗️ Project Architecture
 The system follows a strict **N-Tier Architecture** for scalability and maintainability:
 
-- **`com.hallsymphony.model`**: Entity classes (POJOs) representing core data structures.
-- **`com.hallsymphony.service`**: Business logic layer handling validations, calculations, and data processing.
-- **`com.hallsymphony.ui`**: Graphical layer built with Swing and custom design tokens.
-- **`com.hallsymphony.util`**: Shared utilities for I/O, validation, and styling.
+- **`com.hallsymphony.model`**: The domain layer containing POJOs (Plain Old Java Objects) like `Booking`, `Hall`, and `User`.
+- **`com.hallsymphony.service`**: The business logic engine handling complex validations, financial calculations, and state transitions.
+- **`com.hallsymphony.ui`**: A modular View layer built with custom Swing components and a fluid navigation system.
+- **`com.hallsymphony.util`**: Cross-cutting concerns including Data I/O, regex-based validation, and UI styling utilities.
 
 ---
 
 ## 💎 OOP Concepts Applied
-This project serves as a showcase for advanced Object-Oriented Programming:
-
-1.  **Encapsulation**: All entity fields are `private`, with access restricted via controlled getters/setters in the `model` package.
-2.  **Inheritance**: A hierarchical `User` model allows `Customer`, `Administrator`, `Scheduler`, and `Manager` to share base identity attributes while extending specific behaviors.
-3.  **Abstraction**: Use of `abstract` classes for `User` and `BaseDashboard` defines rigid contracts for specialized implementations.
-4.  **Polymorphism**: Dynamic dispatch is used extensively in `AuthService` and `MainFrame` to handle different user types through common interfaces.
+- **Encapsulation**: Rigid data protection using private fields and controlled accessors.
+- **Inheritance**: A hierarchical `User` model (`Customer` ⮜ `User`, etc.) promotes code reuse.
+- **Abstraction**: Base controllers and dashboards define mandatory behaviors for all modules.
+- **Polymorphism**: Dynamic service loading allows the UI to adapt seamlessly based on the logged-in user's role.
 
 ---
 
 ## ▶️ Setup & Execution
 
 ### Prerequisites
-- **JDK 14+** installed and configured in your PATH.
+- **JDK 14+** installed.
 
-### Installation & Run
-1.  **Compile**: From the project root, run:
+### Quick Start
+1.  **Compile**:
     ```bash
     javac -sourcepath src -d bin HallSymphony.java
     ```
-2.  **Execute**: Run the compiled application:
+2.  **Execute**:
     ```bash
     java -cp bin HallSymphony
     ```
@@ -63,16 +88,14 @@ This project serves as a showcase for advanced Object-Oriented Programming:
 ## 📂 Project Structure
 ```text
 HallSymphony/
-├── src/                # Source code
+├── src/                # Pure source code (Clean Separation)
 │   └── com/hallsymphony/
-│       ├── model/      # Data entities
-│       ├── service/    # Business logic
-│       ├── ui/         # User interface
-│       └── util/       # Infrastructure
-├── data/db/            # Persistent storage (.txt)
-├── bin/                # Compiled artifacts
-└── HallSymphony.java   # App entry point
+│       ├── model/      # Entity definitions
+│       ├── service/    # Business rules
+│       ├── ui/         # Visual components
+│       └── util/       # Foundation utilities
+├── data/db/            # SymphonyDB (Flat-file Storage)
+├── bin/                # Compiled bytecode
+└── HallSymphony.java   # Main entry point
 ```
-
 ---
-*Professional Grade | Scalable Architecture | Academic Excellence*
